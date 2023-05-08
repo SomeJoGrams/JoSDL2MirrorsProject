@@ -1,0 +1,3 @@
+[submodule ".\\SDL2BaseVCPKG\\extern\\vcpkg"]
+	path = .\\SDL2BaseVCPKG\\extern\\vcpkg
+	url = https://github.com/microsoft/vcpkg.git
