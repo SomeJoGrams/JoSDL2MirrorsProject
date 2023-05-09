@@ -10,10 +10,10 @@ if (POLICY CMP0141)
 endif()
 
 
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/SDL2Fractals/extern/vcpkg/scripts/buildsystems/vcpkg.cmake")
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/SDL2Mirrors/extern/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 
-project ("SDL2Fractals")
+project ("SDL2Mirrors")
 
 # Schließen Sie Unterprojekte ein.
-add_subdirectory ("SDL2Fractals")
+add_subdirectory ("SDL2Mirrors")

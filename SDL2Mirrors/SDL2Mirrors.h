@@ -4,7 +4,10 @@
 #pragma once
 
 #include <iostream>
+#include <utility>
+
 #define SDL_MAIN_HANDLED // alternative for linking with visual studio
 #include "SDL2/SDL.h"
+
 
 // TODO: Verweisen Sie hier auf zusätzliche Header, die Ihr Programm erfordert.
