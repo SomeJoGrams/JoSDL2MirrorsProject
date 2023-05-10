@@ -11,7 +11,7 @@ namespace BorderHit
 	
 
 	StraightLine2D hitLineToStraightLine(const HitLine2D& hitLine) {
-		double slope = AngleHelper::degToRad(hitLine.angle);
+		double slope = 1 / std::sin(AngleHelper::degToRad(hitLine.angle));
 		double bias = hitLine.pos.y - slope * hitLine.pos.x;	
 		return StraightLine2D{ slope,bias };
 	}
@@ -34,7 +34,21 @@ namespace BorderHit
 		else if (std::holds_alternative<VerticalLine2D>(firstLine) != std::holds_alternative<VerticalLine2D>(secondLine)) {
 			// for only one vertical line do this
 			// we get a x coordinate and just set it in
-
+			// this gurantees to give us a position
+			double xPos;
+			double yPos;
+			if (const VerticalLine2D* vertLine1 = std::get_if<VerticalLine2D>(&firstLine)) {
+				xPos = vertLine1->xPosition;
+				StraightLine2D line2D = std::get<StraightLine2D>(secondLine);
+				yPos = line2D.slope * xPos + line2D.bias;
+			}
+			else { // secondLine has to be vertical
+				VerticalLine2D vertLine2 = std::get<VerticalLine2D>(secondLine);
+				StraightLine2D line2D = std::get<StraightLine2D>(firstLine);
+				xPos = vertLine2.xPosition;
+				yPos = line2D.slope * xPos + line2D.bias;
+			}
+			return Position2D{ xPos,yPos };
 		}
 		
 		StraightLine2D line1 = std::get<StraightLine2D>(firstLine);
@@ -44,13 +58,13 @@ namespace BorderHit
 		auto b1 = line1.bias;
 		auto m2 = line2.slope;
 		auto b2 = line2.bias;
-		// check for invalid solutions
+		// TODO check for invalid solutions
 		if (m1 == m2 && b1 == b2) {
 			return line1; // same lines
 		}
 		// otherwise create a new pair of where the lines intersect
 		auto x = (b2 - b1) / (m2 - m1);
-		auto y = m2 * x + b1;
+		auto y = m1 * x + b1;
 		Position2D pos{ x,y };
 		return pos;
 	}
@@ -60,31 +74,148 @@ namespace BorderHit
 			&& pos.x <= (*this).shape.width + (*this).shape.pos.x && pos.x >= (*this).shape.pos.x;
 	}
 
-	HitLine2D RectangleHitter::wallHitReflection(size_t startInd) {
-		// TODO implement with startInd
-		//startLine
-		
-
-		//std::variant<VerticalLine2D, StraightLine2D>;
+	void RectangleHitter::wallHitReflection(size_t reflections) {
+		// startLine
 		// hit right side
+		
+		HitLine2D startHitLine;
+		if (this->hitLines.size() > reflections) {
+			return;
+		}
+		else {
+			startHitLine = this->hitLines[this->hitLines.size() - 1];
+		}
+		HitLine2D currentHitLine(startHitLine);
+
 		auto leftLine = VerticalLine2D{this->shape.pos.x};
 		auto rightLine = VerticalLine2D{this->shape.pos.x + this->shape.width};
-		auto botLine = StraightLine2D{1,this->shape.pos.y + this->shape.height};
-		auto topLine = StraightLine2D{1,this->shape.pos.y};
-		auto straightPointLine = hitLineToStraightLine(this->startLine); // TODO fix this to also return vertical lines
-		if (auto notEmptyObject = solveIntersectionPoint(rightLine,straightPointLine)){ // resolve optional
-			if (const Position2D* pos = std::get_if<Position2D>(&notEmptyObject.value())) {
-				if ((*this).insideRectangle(*pos)) {
-					double reflectedAngle = -1 * this->hitLines[0].angle;
-					return HitLine2D{ *pos,reflectedAngle };
+		auto botLine = StraightLine2D{0,this->shape.pos.y + this->shape.height};
+		auto topLine = StraightLine2D{0,this->shape.pos.y};
+
+
+		int foundReflections(0); // if the line the the edge directly 2 lines will be hit 
+		int lastHitSide = 0; // topside = 1, rightSide = 2, botSide = 3, leftSide = 4
+		for (size_t startInd = this->hitLines.size(); startInd < reflections; startInd++) {
+			foundReflections = 0;
+			auto straightPointLine = hitLineToStraightLine(startHitLine);
+			// TODO fix the case where the edge is thit directly , fix equal signs!
+			int quadrant(0); 
+			if (currentHitLine.angle > 0 && currentHitLine.angle <= 90) {
+				quadrant = 1;// the lower left quadrant
+			}
+			else if (currentHitLine.angle > 90 && currentHitLine.angle <= 180) {
+				quadrant = 1;
+			}
+			else if (currentHitLine.angle > 180 && currentHitLine.angle <= 270) {
+				quadrant = 3;
+			}
+			else { // between 270 and 360
+				quadrant = 0;
+			}
+			
+			double reflectedAngle = AngleHelper::addDegreesOnAngle(currentHitLine.angle,90 * quadrant);
+			// this syntax didnt work?
+			//if (auto notEmptyObject = solveIntersectionPoint(rightLine, straightPointLine)) { // resolve optional
+			//	if (const Position2D* pos = std::get_if<Position2D>(&notEmptyObject.value())) { // only reflect in case of a 2d Position
+			//		
+			//		// reflections on the right Line will only happend if the line faces to the right, only take reflections which arent the same as the start position
+			//		if ((*this).insideRectangle(*pos) && facesRight(startHitLine) && !((*pos) == startHitLine.pos)) {
+			//			currentHitLine = HitLine2D{ *pos,reflectedAngle };
+			//			foundReflections += 1;
+			//		}
+			//	}
+			//}
+			//else if (auto notEmptyObject = solveIntersectionPoint(botLine, straightPointLine)) { // resolve optional
+			//	std::cout << "checking bot line";
+			//	if (const Position2D* pos = std::get_if<Position2D>(&notEmptyObject2.value())) { // only reflect in case of a 2d Position
+			//		if ((*this).insideRectangle(*pos) && facesBot(startHitLine) && !((*pos) == startHitLine.pos)) {
+			//			currentHitLine = HitLine2D{ *pos,reflectedAngle };
+			//			foundReflections += 1;
+			//		}
+			//	}
+			//}
+			//else if (auto notEmptyObject = solveIntersectionPoint(leftLine, straightPointLine)) { // resolve optional
+			//	if (const Position2D* pos = std::get_if<Position2D>(&notEmptyObject3.value())) { // only reflect in case of a 2d Position
+			//		if ((*this).insideRectangle(*pos) && facesLeft(startHitLine) && !((*pos) == startHitLine.pos)) {
+			//			currentHitLine = HitLine2D{ *pos,reflectedAngle };
+			//			foundReflections += 1;
+			//		}
+			//	}
+			//}
+			//else if (auto notEmptyObject = solveIntersectionPoint(topLine, straightPointLine)) { // resolve optional
+			//	if (const Position2D* pos = std::get_if<Position2D>(&notEmptyObject4.value())) { // only reflect in case of a 2d Position
+			//		if ((*this).insideRectangle(*pos) && facesTop(startHitLine) && !((*pos) == startHitLine.pos)) {
+			//			currentHitLine = HitLine2D{ *pos,reflectedAngle };
+			//			foundReflections += 1;
+			//		}
+			//	}
+			//}
+			auto rightHit = solveIntersectionPoint(rightLine, straightPointLine);
+			auto botHit = solveIntersectionPoint(botLine, straightPointLine);
+			auto leftHit = solveIntersectionPoint(leftLine, straightPointLine);
+			auto topHit = solveIntersectionPoint(topLine, straightPointLine);
+			
+			if (rightHit) { // resolve optional
+				if (const Position2D* pos = std::get_if<Position2D>(&rightHit.value())) { // only reflect in case of a 2d Position
+					// reflections on the right Line will only happend if the line faces to the right, only take reflections which arent the same as the start position
+					if ((*this).insideRectangle(*pos) && facesRight(startHitLine) && lastHitSide != 2) {
+						currentHitLine = HitLine2D{ *pos,reflectedAngle };
+						foundReflections += 1;
+						lastHitSide = 2;
+
+					}
+				}
+			}
+			if (botHit) { // resolve optional
+				if (const Position2D* pos = std::get_if<Position2D>(&botHit.value())) { // only reflect in case of a 2d Position
+					if ((*this).insideRectangle(*pos) && facesBot(startHitLine) && lastHitSide != 3) {
+						currentHitLine = HitLine2D{ *pos,reflectedAngle };
+						foundReflections += 1;
+						lastHitSide = 3;
+
+					}
+				}
+			}
+			if (leftHit) { // resolve optional
+				if (const Position2D* pos = std::get_if<Position2D>(&leftHit.value())) { // only reflect in case of a 2d Position
+					if ((*this).insideRectangle(*pos) && facesLeft(startHitLine) && lastHitSide != 4) {
+						currentHitLine = HitLine2D{ *pos,reflectedAngle };
+						foundReflections += 1;
+						lastHitSide = 4;
+					}
+				}
+			}
+			if (topHit) { // resolve optional
+				if (const Position2D* pos = std::get_if<Position2D>(&topHit.value())) { // only reflect in case of a 2d Position
+					if ((*this).insideRectangle(*pos) && facesTop(startHitLine) && lastHitSide != 1) {
+						currentHitLine = HitLine2D{ *pos,reflectedAngle };
+						foundReflections += 1;
+						lastHitSide = 1;
+					}
 				}
 			}
 
+			startHitLine = currentHitLine;
+			this->hitLines.push_back(currentHitLine);
+			// end for loop
 		}
-		//else if (auto positionBot = solveIntersectionPoint()/*) {
-
-		//}
-		return HitLine2D{ 0,0,0 };
 	}
+	
+	std::vector<SimpleLine2D> RectangleHitter::getLines(size_t amount) {	
+		this->wallHitReflection(amount);
+		std::vector<SimpleLine2D> result;
+		Position2D startPoint = this->startLine().pos;
+		if (this->hitLines.size() < 2) {
+			return result;
+		}
+		for (auto hitLineIt = std::next(this->hitLines.cbegin(),1); hitLineIt != this->hitLines.cend(); hitLineIt=std::next(hitLineIt,1)) {
+			
+			SimpleLine2D reflectionSimpleLine{ startPoint, (*hitLineIt).pos };
+			startPoint = (*hitLineIt).pos;
+			result.push_back(reflectionSimpleLine);
+		}
+		return result;
+	}
+
 
 }

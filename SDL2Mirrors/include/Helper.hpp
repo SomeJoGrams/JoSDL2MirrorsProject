@@ -1,4 +1,5 @@
 
+#include <cmath> // for remainder operation
 
 #pragma once
 #if __cplusplus >= 202002L
@@ -29,6 +30,12 @@ double radToDeg(const double rad) {
 #else
 	return (360 / (2 * AngleHelper::MY_PI)) * (rad);
 #endif
+}
+
+
+double addDegreesOnAngle(double deg, int degToAdd) {
+	double rem = std::remainder(deg, 1);
+	return (((int)deg + degToAdd) % 360) + rem;
 }
 
 }

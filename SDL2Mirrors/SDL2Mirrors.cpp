@@ -79,11 +79,11 @@ int main(int argc, char* argv[])
     SDL_RenderClear(mainRenderer);
 
     SDL_SetRenderDrawColor(mainRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-    int succ = SDL_RenderFillRect(mainRenderer, &myRect);
-    if (succ == 0) {
+    //int succ = SDL_RenderFillRect(mainRenderer, &myRect);
+    /*if(succ == 0) {
         std::cout << "it was successful\n";
 
-    }
+    }*/
 
     // TODO idea mirror room -> the walls mirror a light line
     int relMouseX(0);
@@ -93,6 +93,15 @@ int main(int argc, char* argv[])
     /*SDL_RenderClear(mainRenderer);
     SDL_RenderPresent(mainRenderer);*/
 
+
+    BorderHit::RectangleHitter hitter(0, 0, 100, 100, BorderHit::HitLine2D{ BorderHit::Position2D{0,5},10 });
+    auto lines = hitter.getLines(5);
+    for (const auto& line : lines) {
+        std::cout << "start " << line.startPos << " end " << line.endPos << "\n";
+        SDL_RenderDrawLine(mainRenderer, line.startPos.x, line.startPos.y, line.endPos.x, line.endPos.y);
+    }
+
+
     SDL_RenderPresent(mainRenderer);
     while (!closeProgram) {
         auto [retCode, closeReq] = handleInputEvents();
@@ -100,11 +109,15 @@ int main(int argc, char* argv[])
 
 
     }
-    // ...
+
 
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(mainRenderer);
     SDL_Quit();
+
+
+
+
 
     return 0;
 }
