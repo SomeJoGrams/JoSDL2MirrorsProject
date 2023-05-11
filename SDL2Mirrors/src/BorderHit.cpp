@@ -10,9 +10,22 @@ namespace BorderHit
 {
 	
 
-	StraightLine2D hitLineToStraightLine(const HitLine2D& hitLine) {
-		double slope = 1 / std::sin(AngleHelper::degToRad(hitLine.angle));
-		double bias = hitLine.pos.y - slope * hitLine.pos.x;	
+	StraightLine2D hitLineToStraightLine(const HitLine2D& hitLine) { // TODO handle Vertical lines
+		double slope(0);
+		if (hitLine.angle < 90 && hitLine.angle >= 0) {
+			slope = 1 / std::sin(AngleHelper::degToRad(hitLine.angle));
+		}
+		else if (hitLine.angle > 180 && hitLine.angle < 270) {
+			slope = -1 / std::sin(AngleHelper::degToRad(hitLine.angle));
+		}
+		else if (hitLine.angle > 90 && hitLine.angle < 180) {
+			slope = - 1 / std::sin(AngleHelper::degToRad(hitLine.angle - 90));
+		}
+		else if (hitLine.angle > 270 && hitLine.angle < 360) {
+			slope = -1 / std::sin(AngleHelper::degToRad(hitLine.angle - 270));
+		}
+		
+		double bias = (1 * hitLine.pos.y) - slope * hitLine.pos.x; // the position has to be inverted, bc the positions are mirrored
 		return StraightLine2D{ slope,bias };
 	}
 
@@ -63,14 +76,13 @@ namespace BorderHit
 			return line1; // same lines
 		}
 		// otherwise create a new pair of where the lines intersect
-		auto x = (b2 - b1) / (m2 - m1);
+		auto x = (b1 - b2) / (m2 - m1);
 		auto y = m1 * x + b1;
-		Position2D pos{ x,y };
-		return pos;
+		return Position2D{ x,y };
 	}
 	
 	bool RectangleHitter::insideRectangle(const Position2D& pos) {
-		return pos.y <= (*this).shape.height + (*this).shape.pos.y && pos.y >= (*this).shape.pos.y
+		return pos.y >= - (*this).shape.height + (*this).shape.pos.y && pos.y <= (*this).shape.pos.y
 			&& pos.x <= (*this).shape.width + (*this).shape.pos.x && pos.x >= (*this).shape.pos.x;
 	}
 
@@ -89,7 +101,7 @@ namespace BorderHit
 
 		auto leftLine = VerticalLine2D{this->shape.pos.x};
 		auto rightLine = VerticalLine2D{this->shape.pos.x + this->shape.width};
-		auto botLine = StraightLine2D{0,this->shape.pos.y + this->shape.height};
+		auto botLine = StraightLine2D{0,this->shape.pos.y - this->shape.height};
 		auto topLine = StraightLine2D{0,this->shape.pos.y};
 
 
@@ -99,18 +111,18 @@ namespace BorderHit
 			foundReflections = 0;
 			auto straightPointLine = hitLineToStraightLine(startHitLine);
 			// TODO fix the case where the edge is thit directly , fix equal signs!
-			int quadrant(0); 
-			if (currentHitLine.angle > 0 && currentHitLine.angle <= 90) {
+			int quadrant(0);
+			if (currentHitLine.angle > 0 && currentHitLine.angle < 90) {
 				quadrant = 1;// the lower left quadrant
 			}
-			else if (currentHitLine.angle > 90 && currentHitLine.angle <= 180) {
+			else if (currentHitLine.angle > 90 && currentHitLine.angle < 180) {
+				quadrant = -1;
+			}
+			else if (currentHitLine.angle > 180 && currentHitLine.angle < 270) {
 				quadrant = 1;
 			}
-			else if (currentHitLine.angle > 180 && currentHitLine.angle <= 270) {
-				quadrant = 3;
-			}
-			else { // between 270 and 360
-				quadrant = 0;
+			else { // between 270 and 360 stuck for exact 90,180, 270,360...
+				quadrant = -1;
 			}
 			
 			double reflectedAngle = AngleHelper::addDegreesOnAngle(currentHitLine.angle,90 * quadrant);
@@ -162,7 +174,6 @@ namespace BorderHit
 						currentHitLine = HitLine2D{ *pos,reflectedAngle };
 						foundReflections += 1;
 						lastHitSide = 2;
-
 					}
 				}
 			}
@@ -204,14 +215,30 @@ namespace BorderHit
 	std::vector<SimpleLine2D> RectangleHitter::getLines(size_t amount) {	
 		this->wallHitReflection(amount);
 		std::vector<SimpleLine2D> result;
-		Position2D startPoint = this->startLine().pos;
+		Position2D startPoint;
+		if (this->startLine().pos.y < 0) {
+			startPoint = Position2D{ this->startLine().pos.x,this->startLine().pos.y * -1 };
+		}
+		else {
+			startPoint = this->startLine().pos;
+		}
+		
+
+
 		if (this->hitLines.size() < 2) {
 			return result;
 		}
+		Position2D posPoint;
 		for (auto hitLineIt = std::next(this->hitLines.cbegin(),1); hitLineIt != this->hitLines.cend(); hitLineIt=std::next(hitLineIt,1)) {
 			
-			SimpleLine2D reflectionSimpleLine{ startPoint, (*hitLineIt).pos };
-			startPoint = (*hitLineIt).pos;
+			if ((*hitLineIt).pos.y < 0) { // the screen has positive coodinated
+				posPoint = Position2D{ (*hitLineIt).pos.x , -1 * (*hitLineIt).pos.y }; // TODO fix
+			}
+			else {
+				posPoint = (*hitLineIt).pos;
+			}
+			SimpleLine2D reflectionSimpleLine{ startPoint, posPoint};
+			startPoint = posPoint;
 			result.push_back(reflectionSimpleLine);
 		}
 		return result;
