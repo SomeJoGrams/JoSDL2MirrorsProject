@@ -13,16 +13,18 @@ namespace BorderHit
 	StraightLine2D hitLineToStraightLine(const HitLine2D& hitLine) { // TODO handle Vertical lines
 		double slope(0);
 		if (hitLine.angle < 90 && hitLine.angle >= 0) {
-			slope = 1 / std::sin(AngleHelper::degToRad(hitLine.angle));
-		}
-		else if (hitLine.angle > 180 && hitLine.angle < 270) {
-			slope = -1 / std::sin(AngleHelper::degToRad(hitLine.angle));
+			slope = 1 / std::tan(AngleHelper::degToRad(hitLine.angle));
 		}
 		else if (hitLine.angle > 90 && hitLine.angle < 180) {
-			slope = - 1 / std::sin(AngleHelper::degToRad(hitLine.angle - 90));
+			slope = - 1 / std::tan(AngleHelper::degToRad(180 - hitLine.angle));
 		}
+		else if (hitLine.angle > 180 && hitLine.angle < 270) {
+			//slope = 1 / std::tan(AngleHelper::degToRad(270 - hitLine.angle));
+			slope = 1 / std::tan(AngleHelper::degToRad(270 - hitLine.angle));
+		}
+		
 		else if (hitLine.angle > 270 && hitLine.angle < 360) {
-			slope = -1 / std::sin(AngleHelper::degToRad(hitLine.angle - 270));
+			slope = 1 / std::tan(AngleHelper::degToRad(hitLine.angle));
 		}
 		
 		double bias = (1 * hitLine.pos.y) - slope * hitLine.pos.x; // the position has to be inverted, bc the positions are mirrored
@@ -105,27 +107,28 @@ namespace BorderHit
 		auto topLine = StraightLine2D{0,this->shape.pos.y};
 
 
-		int foundReflections(0); // if the line the the edge directly 2 lines will be hit 
+		int foundReflections(0); // if the line the the edge directly 2 lines will be hit
 		int lastHitSide = 0; // topside = 1, rightSide = 2, botSide = 3, leftSide = 4
 		for (size_t startInd = this->hitLines.size(); startInd < reflections; startInd++) {
 			foundReflections = 0;
 			auto straightPointLine = hitLineToStraightLine(startHitLine);
-			// TODO fix the case where the edge is thit directly , fix equal signs!
+			// TODO fix the case where the edge is thit directly, fix equal signs!
 			int quadrant(0);
-			if (currentHitLine.angle > 0 && currentHitLine.angle < 90) {
-				quadrant = 1;// the lower left quadrant
-			}
-			else if (currentHitLine.angle > 90 && currentHitLine.angle < 180) {
-				quadrant = -1;
-			}
-			else if (currentHitLine.angle > 180 && currentHitLine.angle < 270) {
-				quadrant = 1;
-			}
-			else { // between 270 and 360 stuck for exact 90,180, 270,360...
-				quadrant = -1;
-			}
-			
-			double reflectedAngle = AngleHelper::addDegreesOnAngle(currentHitLine.angle,90 * quadrant);
+			double reflectedAngle;
+			//if (currentHitLine.angle > 0 && currentHitLine.angle < 90) {
+			//	quadrant = 1;// the lower left quadrant
+			//}
+			//else if (currentHitLine.angle > 90 && currentHitLine.angle < 180) {
+			//	quadrant = -1;
+			//}
+			//else if (currentHitLine.angle > 180 && currentHitLine.angle < 270) {
+			//	quadrant = 1;
+			//}
+			//else { // between 270 and 360 stuck for exact 90,180, 270,360...
+			//	quadrant = -1;
+			//}
+			//
+			//double reflectedAngle = AngleHelper::addDegreesOnAngle(currentHitLine.angle,90 * quadrant);
 			// this syntax didnt work?
 			//if (auto notEmptyObject = solveIntersectionPoint(rightLine, straightPointLine)) { // resolve optional
 			//	if (const Position2D* pos = std::get_if<Position2D>(&notEmptyObject.value())) { // only reflect in case of a 2d Position
@@ -166,11 +169,26 @@ namespace BorderHit
 			auto botHit = solveIntersectionPoint(botLine, straightPointLine);
 			auto leftHit = solveIntersectionPoint(leftLine, straightPointLine);
 			auto topHit = solveIntersectionPoint(topLine, straightPointLine);
-			
+
+			std::optional<Position2D> cornerPosition; // only a hit if two lines are hit at the same time
 			if (rightHit) { // resolve optional
 				if (const Position2D* pos = std::get_if<Position2D>(&rightHit.value())) { // only reflect in case of a 2d Position
 					// reflections on the right Line will only happend if the line faces to the right, only take reflections which arent the same as the start position
 					if ((*this).insideRectangle(*pos) && facesRight(startHitLine) && lastHitSide != 2) {
+						if (startHitLine.angle > 0 && startHitLine.angle < 90) {
+							reflectedAngle = 360 - startHitLine.angle;
+						}
+						else { // between 270 and 360
+							reflectedAngle = 180 + startHitLine.angle;
+						}
+						//if (currentHitLine.angle > 0 && currentHitLine.angle <90) {
+						//	quadrant = -1;
+						//}
+						//else {
+						//	quadrant = 1;
+						//}
+						//reflectedAngle = AngleHelper::addDegreesOnAngle(currentHitLine.angle, 90 * quadrant);
+						//std::cout << "the angle right" << reflectedAngle << "\n";
 						currentHitLine = HitLine2D{ *pos,reflectedAngle };
 						foundReflections += 1;
 						lastHitSide = 2;
@@ -180,30 +198,83 @@ namespace BorderHit
 			if (botHit) { // resolve optional
 				if (const Position2D* pos = std::get_if<Position2D>(&botHit.value())) { // only reflect in case of a 2d Position
 					if ((*this).insideRectangle(*pos) && facesBot(startHitLine) && lastHitSide != 3) {
+						/*if (currentHitLine.angle > 90 && currentHitLine.angle < 180) {
+							quadrant = -1;
+						}
+						else{
+							quadrant = 1;
+						}*/
+						if (startHitLine.angle > 90 && startHitLine.angle < 180) {
+							reflectedAngle = 180 - startHitLine.angle;
+						}
+						else { // between 180 and 270
+							//reflectedAngle = -180 + startHitLine.angle;
+							reflectedAngle = 270 + (270 - startHitLine.angle);
+						}
+						//reflectedAngle = AngleHelper::addDegreesOnAngle(currentHitLine.angle, 90 * quadrant);
 						currentHitLine = HitLine2D{ *pos,reflectedAngle };
 						foundReflections += 1;
 						lastHitSide = 3;
-
+					}
+					if (foundReflections == 2) {
+						cornerPosition = *pos;
 					}
 				}
 			}
 			if (leftHit) { // resolve optional
 				if (const Position2D* pos = std::get_if<Position2D>(&leftHit.value())) { // only reflect in case of a 2d Position
 					if ((*this).insideRectangle(*pos) && facesLeft(startHitLine) && lastHitSide != 4) {
+						/*if (currentHitLine.angle > 180 && currentHitLine.angle < 270) {
+							quadrant = -1;
+						}
+						else {
+							quadrant = 1;
+						}*/
+						if (startHitLine.angle > 180 && startHitLine.angle < 270) {
+							// 360 - angle
+							reflectedAngle = AngleHelper::addDegreesOnAngle(-startHitLine.angle, 360);
+						}
+						else { // between 270 and 360
+							reflectedAngle = 360 - startHitLine.angle;
+						}
 						currentHitLine = HitLine2D{ *pos,reflectedAngle };
 						foundReflections += 1;
 						lastHitSide = 4;
+					}
+					if (foundReflections == 2) {
+						cornerPosition = *pos;
 					}
 				}
 			}
 			if (topHit) { // resolve optional
 				if (const Position2D* pos = std::get_if<Position2D>(&topHit.value())) { // only reflect in case of a 2d Position
 					if ((*this).insideRectangle(*pos) && facesTop(startHitLine) && lastHitSide != 1) {
+						//if (currentHitLine.angle > 270 && currentHitLine.angle < 360) {
+						//	quadrant = -1;
+						//}
+						//else {
+						//	quadrant = 1;
+						//}
+						if (startHitLine.angle > 0 && startHitLine.angle < 90) {
+							reflectedAngle = 180 - startHitLine.angle;
+						}
+						else { // between 270 and 360
+							//180 - angle
+							reflectedAngle = AngleHelper::addDegreesOnAngle(-startHitLine.angle,180);
+						}
+						
 						currentHitLine = HitLine2D{ *pos,reflectedAngle };
 						foundReflections += 1;
 						lastHitSide = 1;
 					}
+					if (foundReflections == 2) {
+						cornerPosition = *pos;
+					}
 				}
+			}
+			if (foundReflections == 2) { // an edge was hit directly, reflect in with the 180 degree rotated angle
+				reflectedAngle = AngleHelper::addDegreesOnAngle(currentHitLine.angle, 180);
+				currentHitLine = HitLine2D{ *(cornerPosition),reflectedAngle };
 			}
 
 			startHitLine = currentHitLine;

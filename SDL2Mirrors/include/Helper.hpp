@@ -35,7 +35,12 @@ double radToDeg(const double rad) {
 
 double addDegreesOnAngle(double deg, int degToAdd) {
 	double rem = std::remainder(deg, 1);
-	return (((int)deg + degToAdd) % 360) + rem;
+	int angle = (((int)deg + degToAdd) % 360);
+	if (angle < 0) {
+		return 360 + angle + rem;
+	}
+	return angle + rem;
 }
+
 
 }
