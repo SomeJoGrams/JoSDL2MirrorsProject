@@ -12,8 +12,15 @@ endif()
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/SDL2Mirrors/extern/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
+set(TESTING_ENABLED TRUE)
+
+if(${TESTING_ENABLED})
+	enable_testing()
+endif()
+
 
 project ("SDL2Mirrors")
+
 
 # Schließen Sie Unterprojekte ein.
 add_subdirectory ("SDL2Mirrors")

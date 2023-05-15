@@ -9,7 +9,7 @@ target_include_directories(BorderHitter INTERFACE "include/")
 
 
 # Fügen Sie der ausführbaren Datei dieses Projekts eine Quelle hinzu.
-add_executable(SDL2Mirrors "SDL2Mirrors.cpp" "SDL2Mirrors.h" "src/BorderHit.cpp")
+add_executable(SDL2Mirrors "src/SDL2Mirrors.cpp" "src/SDL2Mirrors.h" "src/BorderHit.cpp")
 
 
 find_package(SDL2 CONFIG REQUIRED)
@@ -19,6 +19,18 @@ target_link_libraries(SDL2Mirrors  PRIVATE $<TARGET_NAME_IF_EXISTS:SDL2::SDL2mai
 #target_link_libraries(SDL2Fractals PRIVATE SDL2::SDL2)
 
 
+
+if(${TESTING_ENABLED})
+find_package(GTest CONFIG REQUIRED)
+
+add_library(TestLibrary "src/BorderHit.cpp")
+#target_include_directories(TestLibrary "Testing/")
+
+add_executable(TestMirrors "Testing/TestingReflections.cpp")
+
+target_link_libraries(TestMirrors BorderHitter GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+
+endif()
 
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
