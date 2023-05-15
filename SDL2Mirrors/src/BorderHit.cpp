@@ -20,14 +20,14 @@ namespace BorderHit
 		}
 		else if (hitLine.angle > 180 && hitLine.angle < 270) {
 			//slope = 1 / std::tan(AngleHelper::degToRad(270 - hitLine.angle));
-			slope = 1 / std::tan(AngleHelper::degToRad(270 - hitLine.angle));
+			//slope = 1 / std::tan(AngleHelper::degToRad(270 - hitLine.angle));
+			slope = std::tan(AngleHelper::degToRad(270 - hitLine.angle));
 		}
-		
 		else if (hitLine.angle > 270 && hitLine.angle < 360) {
 			slope = 1 / std::tan(AngleHelper::degToRad(hitLine.angle));
 		}
 		
-		double bias = (1 * hitLine.pos.y) - slope * hitLine.pos.x; // the position has to be inverted, bc the positions are mirrored
+		double bias = (hitLine.pos.y) - slope * hitLine.pos.x; // the position has to be inverted, bc the positions are mirrored
 		return StraightLine2D{ slope,bias };
 	}
 
@@ -179,7 +179,7 @@ namespace BorderHit
 							reflectedAngle = 360 - startHitLine.angle;
 						}
 						else { // between 270 and 360
-							reflectedAngle = 180 + startHitLine.angle;
+							reflectedAngle = 360 - startHitLine.angle;
 						}
 						//if (currentHitLine.angle > 0 && currentHitLine.angle <90) {
 						//	quadrant = -1;
@@ -284,18 +284,16 @@ namespace BorderHit
 	}
 	
 	std::vector<SimpleLine2D> RectangleHitter::getLines(size_t amount) {	
-		this->wallHitReflection(amount);
+		this->wallHitReflection(amount + 1); // 1 reflection creates a single point , however we want the amount of lines
+											 // f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		std::vector<SimpleLine2D> result;
 		Position2D startPoint;
-		if (this->startLine().pos.y < 0) {
+		if (this->startLine().pos.y <= 0) {
 			startPoint = Position2D{ this->startLine().pos.x,this->startLine().pos.y * -1 };
 		}
 		else {
-			startPoint = this->startLine().pos;
+			startPoint = this->startLine().pos; // should probably cancel the excution instead, the coordinated should be negative
 		}
-		
-
-
 		if (this->hitLines.size() < 2) {
 			return result;
 		}
@@ -303,7 +301,7 @@ namespace BorderHit
 		for (auto hitLineIt = std::next(this->hitLines.cbegin(),1); hitLineIt != this->hitLines.cend(); hitLineIt=std::next(hitLineIt,1)) {
 			
 			if ((*hitLineIt).pos.y < 0) { // the screen has positive coodinated
-				posPoint = Position2D{ (*hitLineIt).pos.x , -1 * (*hitLineIt).pos.y }; // TODO fix
+				posPoint = Position2D{ (*hitLineIt).pos.x , -1 * (*hitLineIt).pos.y }; 
 			}
 			else {
 				posPoint = (*hitLineIt).pos;
