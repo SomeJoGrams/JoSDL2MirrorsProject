@@ -278,12 +278,7 @@ namespace BorderHit
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		SimpleLine2D resultCutLine;
 		Position2D startPoint;
-		if (this->startLine().pos.y <= 0) {
-			startPoint = Position2D{ this->startLine().pos.x,this->startLine().pos.y * -1 };
-		}
-		else {
-			startPoint = this->hitLines[index].pos; // should probably cancel the excution instead, the coordinated should be negative
-		}
+		startPoint = this->hitLines[index].pos;//should probably cancel the excution instead, the coordinated should be negative
 		Position2D posPoint = this->hitLines[index + 1].pos;
 		std::variant<VerticalLine2D, StraightLine2D> line = positionsToLine(startPoint, posPoint);
 		if (const VerticalLine2D* vertLine = std::get_if<VerticalLine2D>(&line)) {
@@ -301,15 +296,15 @@ namespace BorderHit
 				pointYOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
 			}
 			else if (this->hitLines[index].angle > 90 && this->hitLines[index].angle < 180){
-				pointXOffset = std::cos(AngleHelper::degToRad(180 - this->hitLines[index].angle)) * relativeLength;
-				pointYOffset = std::sin(AngleHelper::degToRad(180 - this->hitLines[index].angle)) * relativeLength;
+				pointXOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle - 90)) * relativeLength;
+				pointYOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle - 90)) * relativeLength;
 			}
 			else if (this->hitLines[index].angle > 180 && this->hitLines[index].angle <= 270){
-				pointXOffset = std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle)) * relativeLength;
-				pointYOffset = std::sin(AngleHelper::degToRad(270 - this->hitLines[index].angle)) * relativeLength;
+				pointXOffset = - std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle)) * relativeLength;
+				pointYOffset = - std::sin(AngleHelper::degToRad(270 - this->hitLines[index].angle)) * relativeLength;
 			}
 			else if (this->hitLines[index].angle > 270 && this->hitLines[index].angle < 360){
-				pointXOffset = std::sin(AngleHelper::degToRad(360 - this->hitLines[index].angle)) * relativeLength;
+				pointXOffset = - std::sin(AngleHelper::degToRad(360 - this->hitLines[index].angle)) * relativeLength;
 				pointYOffset = std::cos(AngleHelper::degToRad(360 - this->hitLines[index].angle)) * relativeLength;
 			}
 			//else { // otherwise its a straight line
@@ -317,8 +312,14 @@ namespace BorderHit
 			//}
 			//auto pointYOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
 			//auto pointXOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
-			resultCutLine = SimpleLine2D{ Position2D{startPoint.x + pointXOffset,startPoint.y + pointYOffset},
-				Position2D{posPoint.x,posPoint.y} };
+			resultCutLine = SimpleLine2D{ Position2D{startPoint.x,startPoint.y},
+				Position2D{startPoint.x + pointXOffset,startPoint.y + pointYOffset} };
+		}
+		if (resultCutLine.startPos.y < 0) {
+			resultCutLine.startPos.y = -1 * resultCutLine.startPos.y;
+		}
+		if (resultCutLine.endPos.y < 0) {
+			resultCutLine.endPos.y = -1 * resultCutLine.endPos.y;
 		}
 		return resultCutLine;
 	}
