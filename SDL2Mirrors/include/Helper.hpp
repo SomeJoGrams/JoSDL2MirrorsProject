@@ -68,14 +68,13 @@ constexpr inline double reflectAngleRight(double inputAngle) {
 }
 
 constexpr inline double reflectAngleBot(double inputAngle) {
-	//if (inputAngle> 90 && inputAngle< 180) {
-	//	return 180 - inputAngle;
-	//}
-	//else { // between 180 and 270
-	//	//reflectedAngle = -180 + startHitLine.angle;
-	//	return 270 + (270 - inputAngle);
-	//}
-	return 180 - inputAngle;
+	if (inputAngle> 90 && inputAngle< 180) {
+		return 180 - inputAngle;
+	}
+	else { // between 180 and 270
+		//reflectedAngle = -180 + startHitLine.angle;
+		return 270 + (270 - inputAngle);
+	}
 }
 
 constexpr inline double reflectAngleLeft(double inputAngle) {

@@ -94,10 +94,8 @@ int main(int argc, char* argv[])
     SDL_RenderPresent(mainRenderer);*/
 
 
-    //BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{10,-40},264 }); // seems wrong, more than 270 seems correct
-    BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-400}, 0.3}); // seems wrong too, below 90 correct
-
-    auto lines = hitter.getLines(15);
+    BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{639,-1}, 45 });
+    auto lines = hitter.getLines(17);
     for (const auto& line : lines) {
         std::cout << "start " << line.startPos << " end " << line.endPos << "\n";
         SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
