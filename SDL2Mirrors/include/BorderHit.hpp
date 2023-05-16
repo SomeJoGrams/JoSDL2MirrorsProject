@@ -77,7 +77,7 @@ namespace BorderHit
 	};
 
 
-	StraightLine2D hitLineToStraightLine(const HitLine2D& hitLine);
+	std::variant<VerticalLine2D, StraightLine2D> hitLineToStraightLine(const HitLine2D& hitLine);
 
 	class RectangleHitter {
 	private:

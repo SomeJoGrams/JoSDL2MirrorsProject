@@ -10,9 +10,12 @@ namespace BorderHit
 {
 	
 
-	StraightLine2D hitLineToStraightLine(const HitLine2D& hitLine) { // TODO handle Vertical lines
+	std::variant<VerticalLine2D,StraightLine2D> hitLineToStraightLine(const HitLine2D& hitLine) { // TODO handle Vertical lines
+		if (hitLine.angle == 0 || hitLine.angle == 180) {
+			return VerticalLine2D{ hitLine.pos.x };
+		}
 		double slope(0);
-		if (hitLine.angle < 90 && hitLine.angle >= 0) {
+		if (hitLine.angle < 90 && hitLine.angle > 0) {
 			slope = 1 / std::tan(AngleHelper::degToRad(hitLine.angle));
 		}
 		else if (hitLine.angle > 90 && hitLine.angle < 180) {
@@ -106,12 +109,11 @@ namespace BorderHit
 		auto botLine = StraightLine2D{0,this->shape.pos.y - this->shape.height};
 		auto topLine = StraightLine2D{0,this->shape.pos.y};
 
-
 		int foundReflections(0); // if the line the the edge directly 2 lines will be hit
 		int lastHitSide = 0; // topside = 1, rightSide = 2, botSide = 3, leftSide = 4
 		for (size_t startInd = this->hitLines.size(); startInd < reflections; startInd++) {
 			foundReflections = 0;
-			auto straightPointLine = hitLineToStraightLine(startHitLine);
+			std::variant<VerticalLine2D, StraightLine2D> straightPointLine = hitLineToStraightLine(startHitLine);
 			// TODO fix the case where the edge is hit directly, fix equal signs!
 			int quadrant(0);
 			double reflectedAngle;
