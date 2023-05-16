@@ -14,12 +14,14 @@ namespace AngleHelper {
 	constexpr double MY_PI = 3.14159265358979323846;
 #endif
 
-double degToRad(const int deg){
+double degToRad(const double deg){
 	// obtain the radians for 1 deg than mpy by the deg 
+	double rem = std::remainder(deg, 1);
+	int angle = (((int)deg) % 360);
 #ifdef USECPLUSPLUS20FEATURES
-	return ((2 * std::numbers::pi) / 360) * (deg % 360);
+	return ((2 * std::numbers::pi) / 360) * (angle + rem);
 #else
-	return ((2 * AngleHelper::MY_PI) / 360) * (deg % 360);
+	return ((2 * AngleHelper::MY_PI) / 360) * (angle + rem);
 #endif
 }
 
@@ -44,7 +46,7 @@ double addDegreesOnAngle(double deg, int degToAdd) {
 
 
 // reflect an angle that hits a top side for example a line
-inline double reflectAngleTop(double inputAngle) noexcept {
+constexpr inline double reflectAngleTop(double inputAngle) noexcept {
 	if (inputAngle > 0 && inputAngle < 90) {
 		return 180 - inputAngle;
 	}
@@ -55,7 +57,7 @@ inline double reflectAngleTop(double inputAngle) noexcept {
 
 }
 
-inline double reflectAngleRight(double inputAngle) {
+constexpr inline double reflectAngleRight(double inputAngle) {
 	//if (inputAngle > 0 && inputAngle < 90) {
 	//	return 360 - inputAngle;
 	//}
@@ -65,7 +67,7 @@ inline double reflectAngleRight(double inputAngle) {
 	return 360 - inputAngle;
 }
 
-inline double reflectAngleBot(double inputAngle) {
+constexpr inline double reflectAngleBot(double inputAngle) {
 	//if (inputAngle> 90 && inputAngle< 180) {
 	//	return 180 - inputAngle;
 	//}
@@ -76,7 +78,7 @@ inline double reflectAngleBot(double inputAngle) {
 	return 180 - inputAngle;
 }
 
-inline double reflectAngleLeft(double inputAngle) {
+constexpr inline double reflectAngleLeft(double inputAngle) {
 	if (inputAngle > 180 && inputAngle < 270) {
 		// 360 - angle
 		return AngleHelper::addDegreesOnAngle(-inputAngle, 360);

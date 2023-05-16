@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
 
     //BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{10,-40},264 }); // seems wrong, more than 270 seems correct
-    BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-400},3 }); // seems wrong too, below 90 correct
+    BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-400}, 0.3}); // seems wrong too, below 90 correct
 
     auto lines = hitter.getLines(15);
     for (const auto& line : lines) {
