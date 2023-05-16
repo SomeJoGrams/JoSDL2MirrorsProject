@@ -43,4 +43,47 @@ double addDegreesOnAngle(double deg, int degToAdd) {
 }
 
 
+// reflect an angle that hits a top side for example a line
+inline double reflectAngleTop(double inputAngle) noexcept {
+	if (inputAngle > 0 && inputAngle < 90) {
+		return 180 - inputAngle;
+	}
+	else { // between 270 and 360
+		//180 - angle
+		return AngleHelper::addDegreesOnAngle(-inputAngle, 180);
+	}
+
+}
+
+inline double reflectAngleRight(double inputAngle) {
+	//if (inputAngle > 0 && inputAngle < 90) {
+	//	return 360 - inputAngle;
+	//}
+	//else { // between 270 and 360
+	//	return 360 - inputAngle;
+	//}
+	return 360 - inputAngle;
+}
+
+inline double reflectAngleBot(double inputAngle) {
+	//if (inputAngle> 90 && inputAngle< 180) {
+	//	return 180 - inputAngle;
+	//}
+	//else { // between 180 and 270
+	//	//reflectedAngle = -180 + startHitLine.angle;
+	//	return 270 + (270 - inputAngle);
+	//}
+	return 180 - inputAngle;
+}
+
+inline double reflectAngleLeft(double inputAngle) {
+	if (inputAngle > 180 && inputAngle < 270) {
+		// 360 - angle
+		return AngleHelper::addDegreesOnAngle(-inputAngle, 360);
+	}
+	else { // between 270 and 360
+		return 360 - inputAngle;
+	}
+}
+
 }
