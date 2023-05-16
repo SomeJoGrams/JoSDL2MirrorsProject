@@ -95,11 +95,15 @@ int main(int argc, char* argv[])
 
 
     BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,240}, 0});
-    auto lines = hitter.getLines(17);
-    for (const auto& line : lines) {
-        std::cout << "start " << line.startPos << " end " << line.endPos << "\n";
-        SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-    }
+    //auto lines = hitter.getLines(17);
+    auto line = hitter.getLine(0, 100, 0);
+    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    line = hitter.getLine(1,5,0);
+    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //for (const auto& line : lines) {
+    //    std::cout << "start " << line.startPos << " end " << line.endPos << "\n";
+    //    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //}
   
 
     SDL_RenderPresent(mainRenderer);

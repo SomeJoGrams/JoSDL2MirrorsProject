@@ -34,6 +34,16 @@ namespace BorderHit
 		return StraightLine2D{ slope,bias };
 	}
 
+	std::variant<VerticalLine2D, StraightLine2D> positionsToLine(const Position2D pos1, const Position2D pos2) {
+		if (pos1.x == pos2.x) {
+			return VerticalLine2D{ pos1.x };
+		}
+		auto m = (pos2.y - pos1.y) / (pos2.x - pos1.x);
+		auto b = pos1.y - m * pos1.x;
+		return StraightLine2D{ m,b };
+	}
+
+
 	// maybe use a border to determine start position
 	/*HitLine2D StraightLineToHitLine(const StraightLine2D& straightLine) {
 		int slope = AngleHelper::degToRad(hitLine.angle);
@@ -230,14 +240,12 @@ namespace BorderHit
 
 			startHitLine = currentHitLine;
 			this->hitLines.push_back(currentHitLine);
-
-			// end for loop
 		}
 	}
-	
-	std::vector<SimpleLine2D> RectangleHitter::getLines(size_t amount) {	
+
+	std::vector<SimpleLine2D> RectangleHitter::getLines(size_t amount) {
 		this->wallHitReflection(amount + 1); // 1 reflection creates a single point , however we want the amount of lines
-											 // f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
+		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		std::vector<SimpleLine2D> result;
 		Position2D startPoint;
 		if (this->startLine().pos.y <= 0) {
@@ -250,21 +258,70 @@ namespace BorderHit
 			return result;
 		}
 		Position2D posPoint;
-		for (auto hitLineIt = std::next(this->hitLines.cbegin(),1); hitLineIt != this->hitLines.cend(); hitLineIt=std::next(hitLineIt,1)) {
-			
+		for (auto hitLineIt = std::next(this->hitLines.cbegin(), 1); hitLineIt != this->hitLines.cend(); hitLineIt = std::next(hitLineIt, 1)) {
+
 			if ((*hitLineIt).pos.y < 0) { // the screen has positive coodinated
-				posPoint = Position2D{ (*hitLineIt).pos.x , -1 * (*hitLineIt).pos.y }; 
+				posPoint = Position2D{ (*hitLineIt).pos.x , -1 * (*hitLineIt).pos.y };
 			}
 			else {
 				posPoint = (*hitLineIt).pos;
 			}
-			SimpleLine2D reflectionSimpleLine{ startPoint, posPoint};
+			SimpleLine2D reflectionSimpleLine{ startPoint, posPoint };
 			startPoint = posPoint;
 			result.push_back(reflectionSimpleLine);
 		}
 		return result;
 	}
 
+	SimpleLine2D RectangleHitter::getLine(size_t index, int startPercent, int endPercent) {
+		this->wallHitReflection(index + 2); // 1 reflection creates a single point , however we want the amount of 
+		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
+		SimpleLine2D resultCutLine;
+		Position2D startPoint;
+		if (this->startLine().pos.y <= 0) {
+			startPoint = Position2D{ this->startLine().pos.x,this->startLine().pos.y * -1 };
+		}
+		else {
+			startPoint = this->hitLines[index].pos; // should probably cancel the excution instead, the coordinated should be negative
+		}
+		Position2D posPoint = this->hitLines[index + 1].pos;
+		std::variant<VerticalLine2D, StraightLine2D> line = positionsToLine(startPoint, posPoint);
+		if (const VerticalLine2D* vertLine = std::get_if<VerticalLine2D>(&line)) {
+			auto yDistance = std::abs(posPoint.y - startPoint.y);
+			resultCutLine = SimpleLine2D{ Position2D{vertLine->xPosition,posPoint.y + yDistance * (startPercent / 100)},
+				Position2D{vertLine->xPosition,posPoint.y + yDistance - yDistance * (endPercent / 100)} };
+		}
+		else { // Straight Line
+			auto overallDistance = position2Ddistance(posPoint, startPoint);
+			auto relativeLength = (static_cast<double>(startPercent) / 100) * overallDistance;
+			double pointYOffset(0);
+			double pointXOffset(0);
+			if (this->hitLines[index].angle > 0 && this->hitLines[index].angle <= 90){
+				pointXOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
+				pointYOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
+			}
+			else if (this->hitLines[index].angle > 90 && this->hitLines[index].angle < 180){
+				pointXOffset = std::cos(AngleHelper::degToRad(180 - this->hitLines[index].angle)) * relativeLength;
+				pointYOffset = std::sin(AngleHelper::degToRad(180 - this->hitLines[index].angle)) * relativeLength;
+			}
+			else if (this->hitLines[index].angle > 180 && this->hitLines[index].angle <= 270){
+				pointXOffset = std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle)) * relativeLength;
+				pointYOffset = std::sin(AngleHelper::degToRad(270 - this->hitLines[index].angle)) * relativeLength;
+			}
+			else if (this->hitLines[index].angle > 270 && this->hitLines[index].angle < 360){
+				pointXOffset = std::sin(AngleHelper::degToRad(360 - this->hitLines[index].angle)) * relativeLength;
+				pointYOffset = std::cos(AngleHelper::degToRad(360 - this->hitLines[index].angle)) * relativeLength;
+			}
+			//else { // otherwise its a straight line
+
+			//}
+			//auto pointYOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
+			//auto pointXOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
+			resultCutLine = SimpleLine2D{ Position2D{startPoint.x + pointXOffset,startPoint.y + pointYOffset},
+				Position2D{posPoint.x,posPoint.y} };
+		}
+		return resultCutLine;
+	}
 	
 
 }

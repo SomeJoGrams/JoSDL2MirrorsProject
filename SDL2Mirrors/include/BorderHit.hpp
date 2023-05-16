@@ -12,6 +12,11 @@ namespace BorderHit
 		double y;
 	};
 
+	inline double position2Ddistance(const Position2D pos1, const Position2D pos2) {
+		// dist = sqrt((y2 - y1)^2 + (x2-x1)^2)
+		return std::sqrt((pos2.y - pos1.y) * (pos2.y - pos1.y) + (pos2.x - pos1.x) * (pos2.x - pos1.x));
+	}
+
 	inline bool operator==(const Position2D& pos1, const Position2D& pos2) {
 		return pos1.x == pos2.x && pos1.y == pos2.y;
 	}
@@ -78,6 +83,7 @@ namespace BorderHit
 
 
 	std::variant<VerticalLine2D, StraightLine2D> hitLineToStraightLine(const HitLine2D& hitLine);
+	std::variant<VerticalLine2D, StraightLine2D> positionsToLine(const Position2D pos1, const Position2D pos2);
 
 	class RectangleHitter {
 	private:
@@ -101,7 +107,7 @@ namespace BorderHit
 
 
 		std::vector<SimpleLine2D> getLines(const size_t amount);
-
+		SimpleLine2D getLine(const size_t index,const int startPercent,const int endPercent);
 	};
 
 
