@@ -1,11 +1,11 @@
 ﻿{
-    "version": 3,
+  "version": 3,
   "configurePresets": [
-      {
-        "name": "toolchain-base",
-        "hidden": true,
-        "toolchainFile": "$env{CMAKE_TOOLCHAIN_FILE}"
-      },
+    {
+      "name": "toolchain-base",
+      "hidden": true,
+      "toolchainFile": "$env{CMAKE_TOOLCHAIN_FILE}"
+    },
     {
       "name": "windows-base",
       "hidden": true,
@@ -102,6 +102,17 @@
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
           "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
         }
+      }
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "windows Test Present",
+      "description": "",
+      "displayName": "",
+      "configurePreset": "x64-debug",
+      "output": {
+        "verbosity": "extra"
       }
     }
   ]

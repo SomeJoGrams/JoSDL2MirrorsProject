@@ -14,13 +14,19 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/SDL2Mirrors/extern/vcpkg/s
 
 set(TESTING_ENABLED TRUE)
 
-if(${TESTING_ENABLED})
-	enable_testing()
-endif()
 
 
 project ("SDL2Mirrors")
 
+if(${TESTING_ENABLED})
+	include(CTest)
+	enable_testing()
+endif()
+
 
 # Schließen Sie Unterprojekte ein.
 add_subdirectory ("SDL2Mirrors")
+
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+include(CPack)

@@ -3,8 +3,9 @@
 #
 
 
+#add_library(BorderHitter INTERFACE)
 add_library(BorderHitter INTERFACE)
-target_include_directories(BorderHitter INTERFACE "include/")
+target_include_directories(BorderHitter INTERFACE "include")
 
 
 
@@ -14,22 +15,14 @@ add_executable(SDL2Mirrors "src/SDL2Mirrors.cpp" "src/SDL2Mirrors.h" "src/Border
 
 find_package(SDL2 CONFIG REQUIRED)
 
-target_link_libraries(SDL2Mirrors  PRIVATE $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+target_link_libraries(SDL2Mirrors PRIVATE $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
         $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static> BorderHitter)
 #target_link_libraries(SDL2Fractals PRIVATE SDL2::SDL2)
 
 
 
 if(${TESTING_ENABLED})
-find_package(GTest CONFIG REQUIRED)
-
-add_library(TestLibrary "src/BorderHit.cpp")
-#target_include_directories(TestLibrary "Testing/")
-
-add_executable(TestMirrors "Testing/TestingReflections.cpp")
-
-target_link_libraries(TestMirrors BorderHitter GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
-
+	add_subdirectory("Testing")
 endif()
 
 

@@ -1,4 +1,4 @@
-
+#pragma once
 #include <cmath> // for remainder operation
 
 #pragma once
