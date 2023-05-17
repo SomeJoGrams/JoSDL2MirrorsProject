@@ -28,6 +28,8 @@ endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET SDL2Mirrors PROPERTY CXX_STANDARD 20)
+else()
+  set_property(TARGET SDL2Mirrors PROPERTY CXX_STANDARD 17)
 endif()
 
 # TODO: Fügen Sie bei Bedarf Tests hinzu, und installieren Sie Ziele.

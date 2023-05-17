@@ -10,13 +10,30 @@ if (POLICY CMP0141)
 endif()
 
 
+if (${USE_EMSCRIPTEN})
+#set(EMSDK_DIR)
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/myToolchain.cmake")
+else()
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/SDL2Mirrors/extern/vcpkg/scripts/buildsystems/vcpkg.cmake")
+endif()
 
-set(TESTING_ENABLED TRUE)
+set(TESTING_ENABLED FALSE)
 
 
 
-project ("SDL2Mirrors")
+
+project("SDL2Mirrors")
+
+if (${USE_EMSCRIPTEN})
+	  # taken from cmakelists minimal_webgl emscripten examle
+   macro(append_linker_flags FLAGS)
+     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${FLAGS}")
+   endmacro()
+   set(CMAKE_EXECUTABLE_SUFFIX ".html")
+
+   append_linker_flags("-sENVIRONMENT=web")
+   append_linker_flags("-sMIN_FIREFOX_VERSION=70")
+endif()
 
 if(${TESTING_ENABLED})
 	include(CTest)
@@ -25,7 +42,7 @@ endif()
 
 
 # Schließen Sie Unterprojekte ein.
-add_subdirectory ("SDL2Mirrors")
+add_subdirectory("SDL2Mirrors")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

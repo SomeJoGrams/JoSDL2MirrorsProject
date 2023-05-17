@@ -9,22 +9,28 @@ using ErrorCode = int;
 std::pair<ErrorCode,CloseProgram> handleInputEvents() {
     SDL_Event event;
     bool closeProgram(false);
+    SDL_WindowEvent windowEvent;
+    SDL_MouseButtonEvent mouseEvent;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_MOUSEBUTTONDOWN:
+        {
             //mouseEvent = static_cast<SDL_MouseButtonEvent*>(&event);
-            SDL_MouseButtonEvent mouseEvent = *(SDL_MouseButtonEvent*)(&event);
+            mouseEvent = *(SDL_MouseButtonEvent*)(&event);
             if (mouseEvent.state == SDL_PRESSED && mouseEvent.button == SDL_BUTTON_RIGHT) {
                 std::cout << "mouse pressed\n";
             }
             break;
+        }
         case SDL_WINDOWEVENT:
-            SDL_WindowEvent windowEvent = *(SDL_WindowEvent*)(&event);
+        {
+            windowEvent = *(SDL_WindowEvent*)(&event);
             if (windowEvent.event == SDL_WINDOWEVENT_CLOSE) {
                 closeProgram = true;
             }
             //std::cout << "window event\n" << (windowEvent.event == SDL_WINDOWEVENT_CLOSE) << " " << windowEvent.event << "\n";
             break;
+        }
         default:
             //std::cout << "a new event of type" << event.type;
             break;

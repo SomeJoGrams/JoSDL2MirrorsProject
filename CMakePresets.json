@@ -15,12 +15,43 @@
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl.exe",
-        "CMAKE_CXX_COMPILER": "cl.exe"
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "USE_EMSCRIPTEN": false
       },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      }
+    },
+    {
+      "name": "emscriptenWindows-base",
+      "hidden": true,
+      "generator": "MinGW Makefiles",
+      "inherits": "toolchain-base",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "H:/FastDocuments/Bibliotheken/ProgrammierBibliotheken/emsdk/upstream/emscripten/emcc.bat",
+        "CMAKE_CXX_COMPILER": "H:/FastDocuments/Bibliotheken/ProgrammierBibliotheken/emsdk/upstream/emscripten/em++.bat",
+        "USE_EMSCRIPTEN" : true
+      }
+      //,"condition": {
+      //  "type": "equals",
+      //  "lhs": "${hostSystemName}",
+      //  "rhs": "Windows"
+      //}
+    },
+    {
+      "name": "emscriptenWindows-debug",
+      "displayName": "emscripten Win debug",
+      "inherits": "emscriptenWindows-base",
+      //"architecture": {
+      //  "value": "x64",
+      //  "strategy": "external"
+      //},
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
