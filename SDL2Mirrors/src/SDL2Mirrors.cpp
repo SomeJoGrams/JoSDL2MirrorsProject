@@ -3,8 +3,12 @@
 
 #include "SDL2Mirrors.h"
 
+
 using CloseProgram = bool;
 using ErrorCode = int;
+
+
+
 
 std::pair<ErrorCode,CloseProgram> handleInputEvents() {
     SDL_Event event;
@@ -39,8 +43,34 @@ std::pair<ErrorCode,CloseProgram> handleInputEvents() {
     return std::pair(0, closeProgram);
 }
 
+#ifdef __EMSCRIPTEN__
+
+// Our "main loop" function. This callback receives the current time as
+// reported by the browser, and the user data we provide in the call to
+// emscripten_request_animation_frame_loop().
+EM_BOOL one_iter(double time, void* userData) {
+    // Can render to the screen here, etc.
+    handleInputEvents();
+    // Return true to keep the loop running.
+    return EM_TRUE;
+}
+#endif
+
+
 int main(int argc, char* argv[])
 {
+#ifdef __EMSCRIPTEN__
+        EM_ASM_INT({
+          const context = canvas.getContext("webgl2");
+
+          var options = {};
+          options['majorVersion'] = 2;
+          options['minorVersion'] = 0;
+
+          const handle = GL.registerContext(context, options);
+          GL.makeContextCurrent(handle);
+            });
+#endif
     bool closeProgram = false;
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -102,13 +132,13 @@ int main(int argc, char* argv[])
 
     BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-240}, 35});
     //auto lines = hitter.getLines(4);
-    auto line = hitter.getLine(0, 100, 0);
+    auto line = hitter.getLine(0, 0, 90);
     SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-    line = hitter.getLine(1,100,0);
+    line = hitter.getLine(1,0,100);
     SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-    line = hitter.getLine(2, 100, 0);
+    line = hitter.getLine(2,0, 100);
     SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-    line = hitter.getLine(3, 100, 0);
+    line = hitter.getLine(3,0, 100);
     SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
     //for (const auto& line : lines) {
     //    std::cout << "start " << line.startPos << " end " << line.endPos << "\n";
@@ -117,13 +147,16 @@ int main(int argc, char* argv[])
   
 
     SDL_RenderPresent(mainRenderer);
+
+#ifdef __EMSCRIPTEN__ // the main loop has to be handled separatley
+    emscripten_request_animation_frame_loop(one_iter, 0);
+#else
     while (!closeProgram) {
         auto [retCode, closeReq] = handleInputEvents();
         closeProgram = closeReq;
 
-
     }
-
+#endif
 
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(mainRenderer);

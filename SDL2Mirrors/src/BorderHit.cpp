@@ -288,32 +288,45 @@ namespace BorderHit
 		}
 		else { // Straight Line
 			auto overallDistance = position2Ddistance(posPoint, startPoint);
-			auto relativeLength = (static_cast<double>(startPercent) / 100) * overallDistance;
-			double pointYOffset(0);
+			auto relativeStartPosition = (static_cast<double>(startPercent) / 100) * overallDistance;
+			auto relativeEndPosition = (static_cast<double>(endPercent) / 100) * overallDistance;
+			// the from offset is the position where to line is started
+			double pointYOffsetFrom(0);
+			double pointXOffsetFrom(0);
+			double pointYOffsetTo(0);
+			double pointXOffsetTo(0);
+			// the 
 			double pointXOffset(0);
+			double xLength(0);
+			double yLength(0);
 			if (this->hitLines[index].angle > 0 && this->hitLines[index].angle <= 90){
-				pointXOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
-				pointYOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
+				xLength = std::sin(AngleHelper::degToRad(this->hitLines[index].angle));
+				yLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle));
 			}
 			else if (this->hitLines[index].angle > 90 && this->hitLines[index].angle < 180){
-				pointXOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle - 90)) * relativeLength;
-				pointYOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle - 90)) * relativeLength;
+				xLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle - 90));
+				yLength = std::sin(AngleHelper::degToRad(this->hitLines[index].angle - 90));
 			}
 			else if (this->hitLines[index].angle > 180 && this->hitLines[index].angle <= 270){
-				pointXOffset = - std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle)) * relativeLength;
-				pointYOffset = - std::sin(AngleHelper::degToRad(270 - this->hitLines[index].angle)) * relativeLength;
+				xLength = - std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle));
+				yLength = - std::sin(AngleHelper::degToRad(270 - this->hitLines[index].angle));
 			}
 			else if (this->hitLines[index].angle > 270 && this->hitLines[index].angle < 360){
-				pointXOffset = - std::sin(AngleHelper::degToRad(360 - this->hitLines[index].angle)) * relativeLength;
-				pointYOffset = std::cos(AngleHelper::degToRad(360 - this->hitLines[index].angle)) * relativeLength;
+				xLength = - std::sin(AngleHelper::degToRad(360 - this->hitLines[index].angle));
+				yLength = std::cos(AngleHelper::degToRad(360 - this->hitLines[index].angle));
 			}
-			//else { // otherwise its a straight line
+
+			pointXOffsetFrom = xLength * relativeStartPosition;
+			pointYOffsetFrom = yLength * relativeStartPosition;
+			pointXOffsetTo = xLength * relativeEndPosition;
+			pointYOffsetTo = yLength * relativeEndPosition;
 
 			//}
 			//auto pointYOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
 			//auto pointXOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
-			resultCutLine = SimpleLine2D{ Position2D{startPoint.x,startPoint.y},
-				Position2D{startPoint.x + pointXOffset,startPoint.y + pointYOffset} };
+			resultCutLine = SimpleLine2D{ Position2D{startPoint.x + pointXOffsetFrom,startPoint.y + pointYOffsetFrom},
+				Position2D{startPoint.x + pointXOffsetTo,startPoint.y + pointYOffsetTo}
+			};
 		}
 		if (resultCutLine.startPos.y < 0) {
 			resultCutLine.startPos.y = -1 * resultCutLine.startPos.y;

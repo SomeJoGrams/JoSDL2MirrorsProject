@@ -34,7 +34,8 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "H:/FastDocuments/Bibliotheken/ProgrammierBibliotheken/emsdk/upstream/emscripten/emcc.bat",
         "CMAKE_CXX_COMPILER": "H:/FastDocuments/Bibliotheken/ProgrammierBibliotheken/emsdk/upstream/emscripten/em++.bat",
-        "USE_EMSCRIPTEN" : true
+        "USE_EMSCRIPTEN": true//,
+        //"VCPKG_TARGET_TRIPLET": "wasm32-emscripten" // somehow does not work
       }
       //,"condition": {
       //  "type": "equals",

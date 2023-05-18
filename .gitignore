@@ -366,3 +366,6 @@ FodyWeavers.xsd
 extern/vcpkg/
 /vcpkg_installed
 /.vscode
+
+#server for reloading the html + ruby config
+/LiveReloadServer
