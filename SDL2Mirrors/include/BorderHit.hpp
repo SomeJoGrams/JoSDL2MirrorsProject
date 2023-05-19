@@ -81,6 +81,11 @@ namespace BorderHit
 		double height;
 	};
 
+	struct TraveledLine {
+		size_t lineIndex;
+		double traveledDistance; // the time that is traveled on the line
+	};
+
 
 	std::variant<VerticalLine2D, StraightLine2D> hitLineToStraightLine(const HitLine2D& hitLine);
 	std::variant<VerticalLine2D, StraightLine2D> positionsToLine(const Position2D pos1, const Position2D pos2);
@@ -112,6 +117,7 @@ namespace BorderHit
 
 		std::vector<SimpleLine2D> getLines(const size_t amount);
 		SimpleLine2D getLine(const size_t index,const int startPercent,const int endPercent);
+		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeed(size_t startIndex, int speed, int time)
 	};
 
 

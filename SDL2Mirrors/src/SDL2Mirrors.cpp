@@ -174,6 +174,9 @@ int main(int argc, char* argv[])
     size_t currentLineIndex = 1;
     bool clearScreen = true;
 
+    double speed = 1;
+    int time = 0;
+
 #ifdef __EMSCRIPTEN__ // the main loop has to be handled separatley
     emscripten_request_animation_frame_loop(one_iter, 0);
 #else
@@ -182,6 +185,7 @@ int main(int argc, char* argv[])
         closeProgram = closeReq;
 
         line = hitter.getLine(currentLineIndex, lineStartPercent, lineEndPercent);
+        std::vector<BorderHit::SimpleLine2D> lines = hitter.getLinesWithSpeed(currentLineIndex, speed, time); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
         //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
         if (lineEndPercent >= 100) {

@@ -341,4 +341,93 @@ namespace BorderHit
 	}
 	
 
+
+	std::pair<std::vector<SimpleLine2D>,TraveledLine>> RectangleHitter::getLinesWithSpeed(size_t startIndex, int speed, int time) {
+		this->wallHitReflection(startIndex + 5); // 1 reflection creates a single point , however we want the amount of 
+		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
+		size_t currentIndex = startIndex;
+		std::vector<SimpleLine2D> resultCutLines;
+		Position2D startPoint;
+		startPoint = this->hitLines[startIndex].pos;//should probably cancel the excution instead, the coordinated should be negative
+		Position2D endPoint = this->hitLines[startIndex + 1].pos;
+		std::variant<VerticalLine2D, StraightLine2D> line = positionsToLine(startPoint, endPoint);
+		double distanceToTravel = speed * time;
+
+		if (const VerticalLine2D* vertLine = std::get_if<VerticalLine2D>(&line)) { // vertical lines will always stay vertical
+			//auto yDistance = std::abs(endPoint.y - startPoint.y);
+			auto overallLength = position2Ddistance(endPoint, startPoint);
+			while (distanceToTravel > 0) {
+				if (overallLength > distanceToTravel) {
+					// only travel on the line
+
+					TraveledLine traveledLine{currentIndex,distanceToTravel};
+					return std::pair{ resultCutLines, traveledLine};
+				}
+				else {
+
+				}
+				
+				startPoint = this->hitLines[currentIndex].pos;
+				endPoint = this->hitLines[currentIndex+1].pos;
+
+				currentIndex += 1;
+				if (currentIndex > this->hitLines.size()) {
+					this->wallHitReflection(currentIndex + 5);
+				}
+
+
+			}
+			resultCutLine = SimpleLine2D{ Position2D{vertLine->xPosition,endPoint.y + yDistance * (startPercent / 100)},
+				Position2D{vertLine->xPosition,endPoint.y + yDistance - yDistance * (endPercent / 100)} };
+		}
+		else { // Straight Line
+			auto overallDistance = position2Ddistance(endPoint, startPoint);
+			auto relativeStartPosition = 0 * overallDistance;
+			auto relativeEndPosition = 1 * overallDistance;
+			// the from offset is the position where to line is started
+			double pointYOffsetFrom(0);
+			double pointXOffsetFrom(0);
+			double pointYOffsetTo(0);
+			double pointXOffsetTo(0);
+			// the 
+			double pointXOffset(0);
+			double xLength(0);
+			double yLength(0);
+			if (this->hitLines[index].angle > 0 && this->hitLines[index].angle <= 90) {
+				xLength = std::sin(AngleHelper::degToRad(this->hitLines[index].angle));
+				yLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle));
+			}
+			else if (this->hitLines[index].angle > 90 && this->hitLines[index].angle < 180) {
+				xLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle - 90));
+				yLength = -std::sin(AngleHelper::degToRad(this->hitLines[index].angle - 90));
+			}
+			else if (this->hitLines[index].angle > 180 && this->hitLines[index].angle <= 270) {
+				xLength = -std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle));
+				yLength = -std::sin(AngleHelper::degToRad(270 - this->hitLines[index].angle));
+			}
+			else if (this->hitLines[index].angle > 270 && this->hitLines[index].angle < 360) {
+				xLength = -std::sin(AngleHelper::degToRad(360 - this->hitLines[index].angle));
+				yLength = std::cos(AngleHelper::degToRad(360 - this->hitLines[index].angle));
+			}
+
+			pointXOffsetFrom = xLength * relativeStartPosition;
+			pointYOffsetFrom = yLength * relativeStartPosition;
+			pointXOffsetTo = xLength * relativeEndPosition;
+			pointYOffsetTo = yLength * relativeEndPosition;
+
+			//}
+			//auto pointYOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
+			//auto pointXOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
+			resultCutLine = SimpleLine2D{ Position2D{startPoint.x + pointXOffsetFrom,startPoint.y + pointYOffsetFrom},
+				Position2D{startPoint.x + pointXOffsetTo,startPoint.y + pointYOffsetTo}
+			};
+		}
+		if (resultCutLine.startPos.y < 0) {
+			resultCutLine.startPos.y = -1 * resultCutLine.startPos.y;
+		}
+		if (resultCutLine.endPos.y < 0) {
+			resultCutLine.endPos.y = -1 * resultCutLine.endPos.y;
+		}
+		return resultCutLine;
+	}
 }
