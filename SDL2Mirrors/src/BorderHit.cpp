@@ -269,6 +269,9 @@ namespace BorderHit
 			SimpleLine2D reflectionSimpleLine{ startPoint, posPoint };
 			startPoint = posPoint;
 			result.push_back(reflectionSimpleLine);
+			if (result.size() == amount) {
+				break;
+			}
 		}
 		return result;
 	}
@@ -305,7 +308,7 @@ namespace BorderHit
 			}
 			else if (this->hitLines[index].angle > 90 && this->hitLines[index].angle < 180){
 				xLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle - 90));
-				yLength = std::sin(AngleHelper::degToRad(this->hitLines[index].angle - 90));
+				yLength = - std::sin(AngleHelper::degToRad(this->hitLines[index].angle - 90));
 			}
 			else if (this->hitLines[index].angle > 180 && this->hitLines[index].angle <= 270){
 				xLength = - std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle));

@@ -100,6 +100,10 @@ namespace BorderHit
 		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height,HitLine2D startLine) :
 			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height}), hitLines{startLine} {
 		};
+		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height, HitLine2D startLine,size_t precalculatedLines) :
+			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height }), hitLines{ startLine } {
+			this->wallHitReflection(precalculatedLines + 1);
+		};
 		RectangleHitter(const HitRectangle2D& rect) : shape(rect), hitLines{ HitLine2D{0,0,0} } {
 		};
 		RectangleHitter(const HitRectangle2D& rect,const HitLine2D& startLine) : shape(rect), hitLines{ startLine } {

@@ -43,6 +43,10 @@ std::pair<ErrorCode,CloseProgram> handleInputEvents() {
     return std::pair(0, closeProgram);
 }
 
+void delayMethod(int msDelay,int whenMs) {
+    return;
+}
+
 #ifdef __EMSCRIPTEN__
 
 // Our "main loop" function. This callback receives the current time as
@@ -130,23 +134,45 @@ int main(int argc, char* argv[])
     SDL_RenderPresent(mainRenderer);*/
 
 
-    BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-240}, 35});
-    //auto lines = hitter.getLines(4);
-    auto line = hitter.getLine(0, 0, 90);
+    BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{100,-370}, 260},10);
+    //BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-240}, 35 });
+    
+    //auto line = hitter.getLine(0, 5, 15);
+    //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //line = hitter.getLine(0, 30, 45);
+    //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //line = hitter.getLine(0, 50, 100);
+    //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //line = hitter.getLine(1, 0, 100);
+    //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //auto line = hitter.getLine(0, 75, 100);
+    //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //
+    auto line = hitter.getLine(1,0,100);
     SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-    line = hitter.getLine(1,0,100);
-    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-    line = hitter.getLine(2,0, 100);
-    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-    line = hitter.getLine(3,0, 100);
-    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //line = hitter.getLine(2,0, 100);
+    //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //line = hitter.getLine(3,0, 100);
+    //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    //
+    //auto lines = hitter.getLines(3);
     //for (const auto& line : lines) {
     //    std::cout << "start " << line.startPos << " end " << line.endPos << "\n";
     //    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
     //}
   
+    int fps = 60;
+    int millliseconds = std::ceil(1000/60);
+
 
     SDL_RenderPresent(mainRenderer);
+
+    
+    int percentStep = 5;
+    int lineStartPercent = 0;
+    int lineEndPercent = percentStep;
+    size_t currentLineIndex = 1;
+    bool clearScreen = true;
 
 #ifdef __EMSCRIPTEN__ // the main loop has to be handled separatley
     emscripten_request_animation_frame_loop(one_iter, 0);
@@ -155,6 +181,27 @@ int main(int argc, char* argv[])
         auto [retCode, closeReq] = handleInputEvents();
         closeProgram = closeReq;
 
+        line = hitter.getLine(currentLineIndex, lineStartPercent, lineEndPercent);
+        SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+        //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+        if (lineEndPercent >= 100) {
+            // eventually clear the scrren to make it seem like a real reflection;
+            if (clearScreen) {
+                SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+                SDL_RenderClear(mainRenderer);
+                SDL_SetRenderDrawColor(mainRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+            }
+            lineStartPercent = 0;
+            lineEndPercent = percentStep;
+            currentLineIndex += 1;
+        }
+        else {
+            lineStartPercent += percentStep;
+            lineEndPercent += percentStep;
+        }
+        //SDL_GetTicks64()
+        SDL_Delay(16); // wait 16 ms to reach 60 fps
+        SDL_RenderPresent(mainRenderer);
     }
 #endif
 
