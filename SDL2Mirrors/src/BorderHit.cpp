@@ -351,88 +351,156 @@ namespace BorderHit
 		startPoint = this->hitLines[startIndex].pos;//should probably cancel the excution instead, the coordinated should be negative
 		Position2D endPoint = this->hitLines[startIndex + 1].pos;
 		std::variant<VerticalLine2D, StraightLine2D> line = positionsToLine(startPoint, endPoint);
+		
+
+		if (time == 0 || speed == 0) {
+			return std::pair{ resultCutLines, TraveledLine{0,0} };
+		}
 		double distanceToTravel = speed * time;
 
-		if (const VerticalLine2D* vertLine = std::get_if<VerticalLine2D>(&line)) { // vertical lines will always stay vertical
+
+		if (const VerticalLine2D* vertLine = std::get_if<VerticalLine2D>(&line)) { // vertical lines will always stay vertical in a box
 			//auto yDistance = std::abs(endPoint.y - startPoint.y);
-			auto overallLength = position2Ddistance(endPoint, startPoint);
 			while (distanceToTravel > 0) {
+				auto overallLength = position2Ddistance(endPoint, startPoint);
 				if (distanceToTravel < overallLength) {
 					// only travel on the line
 					//startPoint.y + distanceToTravel
 					double signedDistance = startPoint.y > endPoint.y ? -1 * distanceToTravel : distanceToTravel; // decide the direction in which to go
-					resultCutLines.push_back({ Position2D{startPoint.x,startPoint.y},
-						Position2D{startPoint.x,startPoint.y + signedDistance} });
+
+					resultCutLines.push_back({ Position2D{startPoint.x,std::abs(startPoint.y)},
+						Position2D{startPoint.x,std::abs(startPoint.y + signedDistance)} });
 					// store the already traveled Distance
 					TraveledLine traveledLine{currentIndex,distanceToTravel};
 					return std::pair{ resultCutLines, traveledLine};
 				}
 				else {
-					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,startPoint.y},
-						Position2D{endPoint.x,endPoint.y} }); // the line is completly from point to point
+					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
+						Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly from point to point
 				}
 				
+				distanceToTravel -= overallLength;
+				currentIndex += 1;
 				startPoint = this->hitLines[currentIndex].pos;
 				endPoint = this->hitLines[currentIndex+1].pos;
 
-				currentIndex += 1;
+
 				if (currentIndex > this->hitLines.size()) {
 					this->wallHitReflection(currentIndex + 5);
 				}
-
-				
 			}
-			//resultCutLine = SimpleLine2D{ Position2D{vertLine->xPosition,endPoint.y + yDistance * (startPercent / 100)},
-			//Position2D{vertLine->xPosition,endPoint.y + yDistance - yDistance * (endPercent / 100)} };
 		}
 		else { // Straight Line
-			auto overallDistance = position2Ddistance(endPoint, startPoint);
-			auto relativeStartPosition = 0 * overallDistance;
-			auto relativeEndPosition = 1 * overallDistance;
-			// the from offset is the position where to line is started
-			double pointYOffsetFrom(0);
-			double pointXOffsetFrom(0);
-			double pointYOffsetTo(0);
-			double pointXOffsetTo(0);
-			// the 
-			double pointXOffset(0);
-			double xLength(0);
-			double yLength(0);
-			if (this->hitLines[index].angle > 0 && this->hitLines[index].angle <= 90) {
-				xLength = std::sin(AngleHelper::degToRad(this->hitLines[index].angle));
-				yLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle));
-			}
-			else if (this->hitLines[index].angle > 90 && this->hitLines[index].angle < 180) {
-				xLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle - 90));
-				yLength = -std::sin(AngleHelper::degToRad(this->hitLines[index].angle - 90));
-			}
-			else if (this->hitLines[index].angle > 180 && this->hitLines[index].angle <= 270) {
-				xLength = -std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle));
-				yLength = -std::sin(AngleHelper::degToRad(270 - this->hitLines[index].angle));
-			}
-			else if (this->hitLines[index].angle > 270 && this->hitLines[index].angle < 360) {
-				xLength = -std::sin(AngleHelper::degToRad(360 - this->hitLines[index].angle));
-				yLength = std::cos(AngleHelper::degToRad(360 - this->hitLines[index].angle));
-			}
 
-			pointXOffsetFrom = xLength * relativeStartPosition;
-			pointYOffsetFrom = yLength * relativeStartPosition;
-			pointXOffsetTo = xLength * relativeEndPosition;
-			pointYOffsetTo = yLength * relativeEndPosition;
+			while (distanceToTravel > 0) {
+				auto overallLength = position2Ddistance(endPoint, startPoint);
+				// todo check equality
+				if (distanceToTravel < overallLength) {
+					// only travel on the line
+					//startPoint.y + distanceToTravel
+
+					// idea: calculate the relative distance and then go on just like in getLine
+					double relativeDistance = distanceToTravel / overallLength;
+
+					//auto relativeStartPosition = overallDistance;
+					//auto relativeEndPosition = overallDistance;
+					// the from offset is the position where to line is started
+					double pointYOffsetFrom(0);
+					double pointXOffsetFrom(0);
+					double pointYOffsetTo(0);
+					double pointXOffsetTo(0);
+					double xLength(0);
+					double yLength(0);
+					if (this->hitLines[currentIndex].angle > 0 && this->hitLines[currentIndex].angle <= 90) {
+						xLength = std::sin(AngleHelper::degToRad(this->hitLines[currentIndex].angle));
+						yLength = std::cos(AngleHelper::degToRad(this->hitLines[currentIndex].angle));
+					}
+					else if (this->hitLines[currentIndex].angle > 90 && this->hitLines[currentIndex].angle < 180) {
+						xLength = std::cos(AngleHelper::degToRad(this->hitLines[currentIndex].angle - 90));
+						yLength = -std::sin(AngleHelper::degToRad(this->hitLines[currentIndex].angle - 90));
+					}
+					else if (this->hitLines[currentIndex].angle > 180 && this->hitLines[currentIndex].angle <= 270) {
+						xLength = -std::cos(AngleHelper::degToRad(270 - this->hitLines[currentIndex].angle));
+						yLength = -std::sin(AngleHelper::degToRad(270 - this->hitLines[currentIndex].angle));
+					}
+					else if (this->hitLines[currentIndex].angle > 270 && this->hitLines[currentIndex].angle < 360) {
+						xLength = -std::sin(AngleHelper::degToRad(360 - this->hitLines[currentIndex].angle));
+						yLength = std::cos(AngleHelper::degToRad(360 - this->hitLines[currentIndex].angle));
+					}
+					//pointXOffsetFrom = xLength * relativeStartPosition;
+					//pointYOffsetFrom = yLength * relativeStartPosition;
+					pointXOffsetTo = xLength * overallLength * relativeDistance;
+					pointYOffsetTo = yLength * overallLength * relativeDistance;
+
+					//double fixedYStartCoordinate = startPoint.y + pointXOffsetFrom < 0 ? (startPoint.y + pointXOffsetFrom) * -1 : (startPoint.y + pointXOffsetFrom);
+					//double fixedYEndCoordinate = startPoint.y + pointYOffsetTo < 0 ? (startPoint.y + pointYOffsetTo) * -1 : (startPoint.y + pointYOffsetTo);
+					resultCutLines.push_back({ Position2D{startPoint.x + pointXOffsetFrom,std::abs(startPoint.y + pointXOffsetFrom)},
+						Position2D{startPoint.x + pointXOffsetTo,std::abs(startPoint.y + pointYOffsetTo)} });
+					// store the already travelled Distance
+					TraveledLine traveledLine{ currentIndex,distanceToTravel};
+					return std::pair{ resultCutLines, traveledLine };
+				}
+				else {
+					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
+						Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly from point to point
+				}
+
+				distanceToTravel -= overallLength;
+				currentIndex += 1;
+				startPoint = this->hitLines[currentIndex].pos;
+				endPoint = this->hitLines[currentIndex + 1].pos;
+
+				if (currentIndex > this->hitLines.size()) {
+					this->wallHitReflection(currentIndex + 5);
+				}
+			}
+			//auto overallDistance = position2Ddistance(endPoint, startPoint);
+			//auto relativeStartPosition = 0 * overallDistance;
+			//auto relativeEndPosition = 1 * overallDistance;
+			// the from offset is the position where to line is started
+			//double pointYOffsetFrom(0);
+			//double pointXOffsetFrom(0);
+			//double pointYOffsetTo(0);
+			//double pointXOffsetTo(0);
+			//// the 
+			//double pointXOffset(0);
+			//double xLength(0);
+			//double yLength(0);
+			//if (this->hitLines[index].angle > 0 && this->hitLines[index].angle <= 90) {
+			//	xLength = std::sin(AngleHelper::degToRad(this->hitLines[index].angle));
+			//	yLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle));
+			//}
+			//else if (this->hitLines[index].angle > 90 && this->hitLines[index].angle < 180) {
+			//	xLength = std::cos(AngleHelper::degToRad(this->hitLines[index].angle - 90));
+			//	yLength = -std::sin(AngleHelper::degToRad(this->hitLines[index].angle - 90));
+			//}
+			//else if (this->hitLines[index].angle > 180 && this->hitLines[index].angle <= 270) {
+			//	xLength = -std::cos(AngleHelper::degToRad(270 - this->hitLines[index].angle));
+			//	yLength = -std::sin(AngleHelper::degToRad(270 - this->hitLines[index].angle));
+			//}
+			//else if (this->hitLines[index].angle > 270 && this->hitLines[index].angle < 360) {
+			//	xLength = -std::sin(AngleHelper::degToRad(360 - this->hitLines[index].angle));
+			//	yLength = std::cos(AngleHelper::degToRad(360 - this->hitLines[index].angle));
+			//}
+
+			//pointXOffsetFrom = xLength * relativeStartPosition;
+			//pointYOffsetFrom = yLength * relativeStartPosition;
+			//pointXOffsetTo = xLength * relativeEndPosition;
+			//pointYOffsetTo = yLength * relativeEndPosition;
 
 			//}
 			//auto pointYOffset = std::cos(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
 			//auto pointXOffset = std::sin(AngleHelper::degToRad(this->hitLines[index].angle)) * relativeLength;
-			resultCutLine = SimpleLine2D{ Position2D{startPoint.x + pointXOffsetFrom,startPoint.y + pointYOffsetFrom},
-				Position2D{startPoint.x + pointXOffsetTo,startPoint.y + pointYOffsetTo}
-			};
+			//resultCutLine = SimpleLine2D{ Position2D{startPoint.x + pointXOffsetFrom,startPoint.y + pointYOffsetFrom},
+			//	Position2D{startPoint.x + pointXOffsetTo,startPoint.y + pointYOffsetTo}
+			//};
 		}
-		if (resultCutLine.startPos.y < 0) {
-			resultCutLine.startPos.y = -1 * resultCutLine.startPos.y;
-		}
-		if (resultCutLine.endPos.y < 0) {
-			resultCutLine.endPos.y = -1 * resultCutLine.endPos.y;
-		}
-		return resultCutLine;
+		//if (resultCutLine.startPos.y < 0) {
+		//	resultCutLine.startPos.y = -1 * resultCutLine.startPos.y;
+		//}
+		//if (resultCutLine.endPos.y < 0) {
+		//	resultCutLine.endPos.y = -1 * resultCutLine.endPos.y;
+		//}
+		return std::pair{ resultCutLines, TraveledLine{0,0} };
 	}
 }

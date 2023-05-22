@@ -134,7 +134,10 @@ int main(int argc, char* argv[])
     SDL_RenderPresent(mainRenderer);*/
 
 
-    BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{100,-370}, 260},10);
+    int screenXSize = 640;
+    int screenYSize = 480;
+
+    BorderHit::RectangleHitter hitter(0, 0, screenXSize,screenYSize, BorderHit::HitLine2D{ BorderHit::Position2D{100,-370}, 260},10);
     //BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-240}, 35 });
     
     //auto line = hitter.getLine(0, 5, 15);
@@ -148,8 +151,9 @@ int main(int argc, char* argv[])
     //auto line = hitter.getLine(0, 75, 100);
     //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
     //
-    auto line = hitter.getLine(1,0,100);
-    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+    // draw some percent lines
+    //auto line = hitter.getLine(1,0,100);
+    //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
     //line = hitter.getLine(2,0, 100);
     //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
     //line = hitter.getLine(3,0, 100);
@@ -174,7 +178,11 @@ int main(int argc, char* argv[])
     size_t currentLineIndex = 1;
     bool clearScreen = true;
 
-    double speed = 1;
+    
+    //double speed = 10;
+    double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.01; // the diagonal is used to calculate the speed;
+    //double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.01; // one percent of the diagonal
+
     int time = 0;
 
 #ifdef __EMSCRIPTEN__ // the main loop has to be handled separatley
@@ -184,26 +192,36 @@ int main(int argc, char* argv[])
         auto [retCode, closeReq] = handleInputEvents();
         closeProgram = closeReq;
 
-        line = hitter.getLine(currentLineIndex, lineStartPercent, lineEndPercent);
-        std::vector<BorderHit::SimpleLine2D> lines = hitter.getLinesWithSpeed(currentLineIndex, speed, time); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
-        SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
+        //line = hitter.getLine(currentLineIndex, lineStartPercent, lineEndPercent);
+        //std::vector<BorderHit::SimpleLine2D> lines = hitter.getLinesWithSpeed(currentLineIndex, speed, time); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        //std::pair<std::vector<BorderHit::SimpleLine2D>, BorderHit::TraveledLine>
+        
+        
         //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-        if (lineEndPercent >= 100) {
-            // eventually clear the scrren to make it seem like a real reflection;
-            if (clearScreen) {
-                SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-                SDL_RenderClear(mainRenderer);
-                SDL_SetRenderDrawColor(mainRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-            }
-            lineStartPercent = 0;
-            lineEndPercent = percentStep;
-            currentLineIndex += 1;
-        }
-        else {
-            lineStartPercent += percentStep;
-            lineEndPercent += percentStep;
-        }
+        //if (lineEndPercent >= 100) {
+        //    // eventually clear the scrren to make it seem like a real reflection;
+        //    if (clearScreen) {
+        //        SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+        //        SDL_RenderClear(mainRenderer);
+        //        SDL_SetRenderDrawColor(mainRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+        //    }
+        //    lineStartPercent = 0;
+        //    lineEndPercent = percentStep;
+        //    currentLineIndex += 1;
+        //}
+        //else {
+        //    lineStartPercent += percentStep;
+        //    lineEndPercent += percentStep;
+        //}
         //SDL_GetTicks64()
+        auto [lines, traveledLine] = hitter.getLinesWithSpeed(currentLineIndex, speed, time); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        currentLineIndex = traveledLine.lineIndex;
+        time = traveledLine.traveledDistance / speed;
+        time += 1;
+        for (const auto& curLine : lines) {
+            SDL_RenderDrawLine(mainRenderer, (int)curLine.startPos.x, (int)curLine.startPos.y, (int)curLine.endPos.x, (int)curLine.endPos.y);
+        }
+        //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
         SDL_Delay(16); // wait 16 ms to reach 60 fps
         SDL_RenderPresent(mainRenderer);
     }
