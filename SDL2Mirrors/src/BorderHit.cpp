@@ -342,7 +342,7 @@ namespace BorderHit
 	
 
 
-	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeed(size_t startIndex, int speed, int time) {
+	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeed(size_t startIndex, int speed, int time,int trailTime) {
 		this->wallHitReflection(startIndex + 5); // 1 reflection creates a single point , however we want the amount of 
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		size_t currentIndex = startIndex;
@@ -354,7 +354,7 @@ namespace BorderHit
 		
 
 		if (time == 0 || speed == 0) {
-			return std::pair{ resultCutLines, TraveledLine{0,0} };
+			return std::pair{ resultCutLines, TraveledLine{startIndex,0} };
 		}
 		double distanceToTravel = speed * time;
 

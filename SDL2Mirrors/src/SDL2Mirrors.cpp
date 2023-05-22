@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
         //    lineEndPercent += percentStep;
         //}
         //SDL_GetTicks64()
-        auto [lines, traveledLine] = hitter.getLinesWithSpeed(currentLineIndex, speed, time); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        auto [lines, traveledLine] = hitter.getLinesWithSpeed(currentLineIndex, speed, time,10); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         currentLineIndex = traveledLine.lineIndex;
         time = traveledLine.traveledDistance / speed;
         time += 1;
