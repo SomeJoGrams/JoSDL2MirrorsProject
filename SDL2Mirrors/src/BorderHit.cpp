@@ -342,7 +342,7 @@ namespace BorderHit
 	
 
 
-	std::pair<std::vector<SimpleLine2D>,TraveledLine>> RectangleHitter::getLinesWithSpeed(size_t startIndex, int speed, int time) {
+	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeed(size_t startIndex, int speed, int time) {
 		this->wallHitReflection(startIndex + 5); // 1 reflection creates a single point , however we want the amount of 
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		size_t currentIndex = startIndex;
@@ -357,14 +357,19 @@ namespace BorderHit
 			//auto yDistance = std::abs(endPoint.y - startPoint.y);
 			auto overallLength = position2Ddistance(endPoint, startPoint);
 			while (distanceToTravel > 0) {
-				if (overallLength > distanceToTravel) {
+				if (distanceToTravel < overallLength) {
 					// only travel on the line
-
+					//startPoint.y + distanceToTravel
+					double signedDistance = startPoint.y > endPoint.y ? -1 * distanceToTravel : distanceToTravel; // decide the direction in which to go
+					resultCutLines.push_back({ Position2D{startPoint.x,startPoint.y},
+						Position2D{startPoint.x,startPoint.y + signedDistance} });
+					// store the already traveled Distance
 					TraveledLine traveledLine{currentIndex,distanceToTravel};
 					return std::pair{ resultCutLines, traveledLine};
 				}
 				else {
-
+					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,startPoint.y},
+						Position2D{endPoint.x,endPoint.y} }); // the line is completly from point to point
 				}
 				
 				startPoint = this->hitLines[currentIndex].pos;
@@ -375,10 +380,10 @@ namespace BorderHit
 					this->wallHitReflection(currentIndex + 5);
 				}
 
-
+				
 			}
-			resultCutLine = SimpleLine2D{ Position2D{vertLine->xPosition,endPoint.y + yDistance * (startPercent / 100)},
-				Position2D{vertLine->xPosition,endPoint.y + yDistance - yDistance * (endPercent / 100)} };
+			//resultCutLine = SimpleLine2D{ Position2D{vertLine->xPosition,endPoint.y + yDistance * (startPercent / 100)},
+			//Position2D{vertLine->xPosition,endPoint.y + yDistance - yDistance * (endPercent / 100)} };
 		}
 		else { // Straight Line
 			auto overallDistance = position2Ddistance(endPoint, startPoint);
