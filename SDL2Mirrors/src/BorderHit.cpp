@@ -342,22 +342,119 @@ namespace BorderHit
 	
 
 
-	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeed(size_t startIndex, int speed, int time,int trailTime) {
+	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeedWithTrailTime(size_t startIndex, int speed, int time,int trailTime) {
 		this->wallHitReflection(startIndex + 5); // 1 reflection creates a single point , however we want the amount of 
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		size_t currentIndex = startIndex;
 		std::vector<SimpleLine2D> resultCutLines;
-		Position2D startPoint;
-		startPoint = this->hitLines[startIndex].pos;//should probably cancel the excution instead, the coordinated should be negative
+		Position2D startPoint = this->hitLines[startIndex].pos;//should probably cancel the excution instead, the coordinates should be negative
 		Position2D endPoint = this->hitLines[startIndex + 1].pos;
 		std::variant<VerticalLine2D, StraightLine2D> line = positionsToLine(startPoint, endPoint);
-		
-
-		if (time == 0 || speed == 0) {
+		if (time <= 0 || speed <= 0) {
 			return std::pair{ resultCutLines, TraveledLine{startIndex,0} };
 		}
-		double distanceToTravel = speed * time;
 
+		// determine the points of the past, every line that is stepped over should be added
+
+		//if (time - trailTime < 0) { // we have to go back to the last start Indices 
+		if (trailTime > 0) { // we have to go back to the last start Indices
+			// find the start index
+			double backwardsTravelDistance = speed * std::abs(time - trailTime);
+			//if (time - trailTime < 0) {
+			//	backwardsTravelDistance = speed * -1 * (time - trailTime); // make the distance positive to avoid annyoing while loop
+			//}
+			//else {
+			//	backwardsTravelDistance = speed * (time - trailTime);
+			//}
+			// find the position where the trail starts
+
+			if (currentIndex > 0) {
+				//resultCutLines.push_back(SimpleLine2D{ Position2D{endPoint.x,endPoint.y}, // ignore the position
+				//		Position2D{endPoint.x,endPoint.y}
+				//	});
+				startPoint = this->hitLines[currentIndex - 1].pos;// TODO calclulate straight line for index 0
+			}
+			while (backwardsTravelDistance > 0) {
+				if (currentIndex == 0) {
+					break;
+					//startPoint = this->hitLines[currentIndex].pos;
+				}
+				endPoint = this->hitLines[currentIndex].pos;
+				auto overallLength = position2Ddistance(endPoint, startPoint);
+				// todo check equality
+				if (backwardsTravelDistance < overallLength) {
+					// only travel on the line
+					//startPoint.y + distanceToTravel
+					// idea: calculate the relative distance and then go on just like in getLine
+					double relativeDistance = backwardsTravelDistance / overallLength;
+
+					//auto relativeStartPosition = overallDistance;
+					//auto relativeEndPosition = overallDistance;
+					// the from offset is the position where to line is started
+					double pointYOffsetFrom(0);
+					double pointXOffsetFrom(0);
+					double pointYOffsetTo(0);
+					double pointXOffsetTo(0);
+					double xLength(0);
+					double yLength(0);
+					std::pair<double,double> relLengths = AngleHelper::angleToRelativeTriangleLengths(this->hitLines[currentIndex - 1].angle);
+					/*if (this->hitLines[currentIndex].angle > 0 && this->hitLines[currentIndex].angle <= 90) {
+						xLength = std::sin(AngleHelper::degToRad(this->hitLines[currentIndex].angle));
+						yLength = std::cos(AngleHelper::degToRad(this->hitLines[currentIndex].angle));
+					}
+					else if (this->hitLines[currentIndex].angle > 90 && this->hitLines[currentIndex].angle < 180) {
+						xLength = std::cos(AngleHelper::degToRad(this->hitLines[currentIndex].angle - 90));
+						yLength = -std::sin(AngleHelper::degToRad(this->hitLines[currentIndex].angle - 90));
+					}
+					else if (this->hitLines[currentIndex].angle > 180 && this->hitLines[currentIndex].angle <= 270) {
+						xLength = -std::cos(AngleHelper::degToRad(270 - this->hitLines[currentIndex].angle));
+						yLength = -std::sin(AngleHelper::degToRad(270 - this->hitLines[currentIndex].angle));
+					}
+					else if (this->hitLines[currentIndex].angle > 270 && this->hitLines[currentIndex].angle < 360) {
+						xLength = -std::sin(AngleHelper::degToRad(360 - this->hitLines[currentIndex].angle));
+						yLength = std::cos(AngleHelper::degToRad(360 - this->hitLines[currentIndex].angle));
+					}*/
+					//pointXOffsetFrom = xLength * relativeStartPosition;
+					//pointYOffsetFrom = yLength * relativeStartPosition;
+					//pointXOffsetFrom = xLength * overallLength * relativeDistance;
+					//pointYOffsetFrom = yLength * overallLength * relativeDistance;
+
+					pointXOffsetFrom = relLengths.first * overallLength * relativeDistance;
+					pointYOffsetFrom = relLengths.second * overallLength * relativeDistance;
+
+					//double fixedYStartCoordinate = startPoint.y + pointXOffsetFrom < 0 ? (startPoint.y + pointXOffsetFrom) * -1 : (startPoint.y + pointXOffsetFrom);
+					//double fixedYEndCoordinate = startPoint.y + pointYOffsetTo < 0 ? (startPoint.y + pointYOffsetTo) * -1 : (startPoint.y + pointYOffsetTo);
+					/*resultCutLines.push_back({ Position2D{endPoint.x - pointXOffsetFrom,std::abs(endPoint.y - pointYOffsetFrom)},
+						Position2D{endPoint.x, endPoint.y} });*/
+					resultCutLines.push_back(SimpleLine2D{ Position2D{ endPoint.x + pointXOffsetFrom,std::abs(endPoint.y + pointYOffsetFrom) },
+						Position2D{startPoint.x,std::abs(startPoint.y)} }); // the startPoint and endPoint are switched!
+					// store the already traveled Distance
+				}
+				else {
+					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
+						Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly included, bc the trailtime is big
+				}
+				backwardsTravelDistance -= overallLength;
+				if (currentIndex == 0 || currentIndex == 1) {
+					break;
+				}
+				currentIndex -= 1;
+				endPoint = this->hitLines[currentIndex].pos;
+				startPoint = this->hitLines[currentIndex - 1].pos;
+			}
+		}
+		//return std::pair{ resultCutLines, TraveledLine{currentIndex,(double)time * speed} };
+
+		//double distanceToTravelTrailStart = speed * (time - trailTime);
+
+		currentIndex = startIndex;
+		//startPoint = this->hitLines[startIndex].pos;
+		startPoint = this->hitLines[startIndex].pos;
+		endPoint = this->hitLines[startIndex + 1].pos; // we might have to travel from the start point only to stay on the line
+		double distanceToTravel = speed * time;
+		if (currentIndex == 0) { // if the line just stated only use the time from the starting point on
+			distanceToTravel = speed * (time - trailTime); // TODO maybe remove this to an use a negative time
+		}
 
 		if (const VerticalLine2D* vertLine = std::get_if<VerticalLine2D>(&line)) { // vertical lines will always stay vertical in a box
 			//auto yDistance = std::abs(endPoint.y - startPoint.y);
@@ -367,8 +464,8 @@ namespace BorderHit
 					// only travel on the line
 					//startPoint.y + distanceToTravel
 					double signedDistance = startPoint.y > endPoint.y ? -1 * distanceToTravel : distanceToTravel; // decide the direction in which to go
-
-					resultCutLines.push_back({ Position2D{startPoint.x,std::abs(startPoint.y)},
+					double trailTimeDistance = speed * time; // problem the trail might also influece in the goal point of the last point, when the time is smaller than the trail time
+					resultCutLines.push_back({ Position2D{startPoint.x,std::abs(startPoint.y + trailTimeDistance)},
 						Position2D{startPoint.x,std::abs(startPoint.y + signedDistance)} });
 					// store the already traveled Distance
 					TraveledLine traveledLine{currentIndex,distanceToTravel};
@@ -411,26 +508,31 @@ namespace BorderHit
 					double pointXOffsetTo(0);
 					double xLength(0);
 					double yLength(0);
-					if (this->hitLines[currentIndex].angle > 0 && this->hitLines[currentIndex].angle <= 90) {
-						xLength = std::sin(AngleHelper::degToRad(this->hitLines[currentIndex].angle));
-						yLength = std::cos(AngleHelper::degToRad(this->hitLines[currentIndex].angle));
-					}
-					else if (this->hitLines[currentIndex].angle > 90 && this->hitLines[currentIndex].angle < 180) {
-						xLength = std::cos(AngleHelper::degToRad(this->hitLines[currentIndex].angle - 90));
-						yLength = -std::sin(AngleHelper::degToRad(this->hitLines[currentIndex].angle - 90));
-					}
-					else if (this->hitLines[currentIndex].angle > 180 && this->hitLines[currentIndex].angle <= 270) {
-						xLength = -std::cos(AngleHelper::degToRad(270 - this->hitLines[currentIndex].angle));
-						yLength = -std::sin(AngleHelper::degToRad(270 - this->hitLines[currentIndex].angle));
-					}
-					else if (this->hitLines[currentIndex].angle > 270 && this->hitLines[currentIndex].angle < 360) {
-						xLength = -std::sin(AngleHelper::degToRad(360 - this->hitLines[currentIndex].angle));
-						yLength = std::cos(AngleHelper::degToRad(360 - this->hitLines[currentIndex].angle));
-					}
+					//if (this->hitLines[currentIndex].angle > 0 && this->hitLines[currentIndex].angle <= 90) {
+					//	xLength = std::sin(AngleHelper::degToRad(this->hitLines[currentIndex].angle));
+					//	yLength = std::cos(AngleHelper::degToRad(this->hitLines[currentIndex].angle));
+					//}
+					//else if (this->hitLines[currentIndex].angle > 90 && this->hitLines[currentIndex].angle < 180) {
+					//	xLength = std::cos(AngleHelper::degToRad(this->hitLines[currentIndex].angle - 90));
+					//	yLength = -std::sin(AngleHelper::degToRad(this->hitLines[currentIndex].angle - 90));
+					//}
+					//else if (this->hitLines[currentIndex].angle > 180 && this->hitLines[currentIndex].angle <= 270) {
+					//	xLength = -std::cos(AngleHelper::degToRad(270 - this->hitLines[currentIndex].angle));
+					//	yLength = -std::sin(AngleHelper::degToRad(270 - this->hitLines[currentIndex].angle));
+					//}
+					//else if (this->hitLines[currentIndex].angle > 270 && this->hitLines[currentIndex].angle < 360) {
+					//	xLength = -std::sin(AngleHelper::degToRad(360 - this->hitLines[currentIndex].angle));
+					//	yLength = std::cos(AngleHelper::degToRad(360 - this->hitLines[currentIndex].angle));
+					//}
+					std::pair<double, double> relLengths = AngleHelper::angleToRelativeTriangleLengths(this->hitLines[currentIndex].angle);
+					//pointXOffsetFrom = relLengths.first * overallLength * relativeDistance;
+					//pointYOffsetFrom = relLengths.second * overallLength * relativeDistance;
 					//pointXOffsetFrom = xLength * relativeStartPosition;
 					//pointYOffsetFrom = yLength * relativeStartPosition;
-					pointXOffsetTo = xLength * overallLength * relativeDistance;
-					pointYOffsetTo = yLength * overallLength * relativeDistance;
+					//pointXOffsetTo = xLength * overallLength * relativeDistance;
+					//pointYOffsetTo = yLength * overallLength * relativeDistance;
+					pointXOffsetTo = relLengths.first * overallLength * relativeDistance;
+					pointYOffsetTo = relLengths.second * overallLength * relativeDistance;
 
 					//double fixedYStartCoordinate = startPoint.y + pointXOffsetFrom < 0 ? (startPoint.y + pointXOffsetFrom) * -1 : (startPoint.y + pointXOffsetFrom);
 					//double fixedYEndCoordinate = startPoint.y + pointYOffsetTo < 0 ? (startPoint.y + pointYOffsetTo) * -1 : (startPoint.y + pointYOffsetTo);
@@ -441,8 +543,9 @@ namespace BorderHit
 					return std::pair{ resultCutLines, traveledLine };
 				}
 				else {
+					// the line is completly in the trail
 					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
-						Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly from point to point
+						Position2D{endPoint.x,std::abs(endPoint.y)} });
 				}
 
 				distanceToTravel -= overallLength;
@@ -501,6 +604,6 @@ namespace BorderHit
 		//if (resultCutLine.endPos.y < 0) {
 		//	resultCutLine.endPos.y = -1 * resultCutLine.endPos.y;
 		//}
-		return std::pair{ resultCutLines, TraveledLine{0,0} };
+		return std::pair{ resultCutLines, TraveledLine{currentIndex,(double)time * speed} };
 	}
 }

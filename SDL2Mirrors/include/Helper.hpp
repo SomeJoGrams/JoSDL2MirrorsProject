@@ -87,4 +87,25 @@ constexpr inline double reflectAngleLeft(double inputAngle) {
 	}
 }
 
+constexpr inline std::pair<double,double> angleToRelativeTriangleLengths(double angle) {
+	double xLength(0);
+	double yLength(0);
+	if (angle > 0 && angle <= 90) {
+		xLength = std::sin(AngleHelper::degToRad(angle));
+		yLength = std::cos(AngleHelper::degToRad(angle));
+	}
+	else if (angle > 90 && angle < 180) {
+		xLength = std::cos(AngleHelper::degToRad(angle - 90));
+		yLength = -std::sin(AngleHelper::degToRad(angle - 90));
+	}
+	else if (angle > 180 && angle <= 270) {
+		xLength = -std::cos(AngleHelper::degToRad(270 - angle));
+		yLength = -std::sin(AngleHelper::degToRad(270 - angle));
+	}
+	else if (angle > 270 && angle < 360) {
+		xLength = -std::sin(AngleHelper::degToRad(360 - angle));
+		yLength = std::cos(AngleHelper::degToRad(360 - angle));
+	}
+	return std::pair{ xLength,yLength };
+}
 }
