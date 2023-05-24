@@ -214,9 +214,33 @@ int main(int argc, char* argv[])
         //    lineEndPercent += percentStep;
         //}
         //SDL_GetTicks64()
-        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex,speed,time,10); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        //auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex,speed,time,30); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        // test for index sequqence
+        //std::index_sequence seq = std::index_sequence<30>{}
+        //for (size_t i : std::to_array<size_t>({ 1,2,3,4,5,6,7,8,9,10,11,12 })) {
+        ////for (size_t i = 0; i <= 300; i++){
+        ////    auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, i, 30); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        ////    for (const auto& curLine : lines) {
+        ////        SDL_RenderDrawLine(mainRenderer, (int)curLine.startPos.x, (int)curLine.startPos.y, (int)curLine.endPos.x, (int)curLine.endPos.y);
+        ////        SDL_RenderPresent(mainRenderer);
+        ////        
+        ////    }
+        ////    SDL_Delay(200);
+        ////    SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+        ////    SDL_RenderClear(mainRenderer);
+        ////    SDL_SetRenderDrawColor(mainRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+        ////    std::cout << "drawing" << i << "\n";
+        ////}
+        ////std::cout << "finished\n";
+        ////SDL_Delay(1000);
+
+        ////SDL_DestroyWindow(window);
+        ////SDL_DestroyRenderer(mainRenderer);
+        ////SDL_Quit();
+        ////return 0;
+        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 2); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         currentLineIndex = traveledLine.lineIndex;
-        time = traveledLine.traveledDistance / speed;
+        time = traveledLine.traveledDistance / speed ; // v = s / t <=> s = v * t <=> t = s / v 
         time += 1;
         for (const auto& curLine : lines) {
             SDL_RenderDrawLine(mainRenderer, (int)curLine.startPos.x, (int)curLine.startPos.y, (int)curLine.endPos.x, (int)curLine.endPos.y);

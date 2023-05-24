@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <utility>
+#include <array>
 
 #define SDL_MAIN_HANDLED // alternative for linking with visual studio
 #include "SDL2/SDL.h"
