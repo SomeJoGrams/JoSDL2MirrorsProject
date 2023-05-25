@@ -94,24 +94,35 @@ namespace BorderHit
 	private:
 		HitRectangle2D shape;
 		std::vector<HitLine2D> hitLines;
+		HitLine2D firstLine;
+		size_t removedLines;
 
 		bool insideRectangle(const Position2D& point);
 		void wallHitReflection(const size_t reflections);
-		
+
+		HitLine2D getHitLineAtIndex(size_t index) {
+			// TODO allow indices which have to go back far in the past to load with negative wallHitReflections
+			return this->hitLines[index - removedLines];
+		}
+
+		size_t fixedSize() {
+			return this->hitLines.size() + removedLines;
+		}
+
 	public:
 		inline HitLine2D startLine() {
-			return hitLines[0];
+			return firstLine;
 		}
 		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height,HitLine2D startLine) :
-			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height}), hitLines{startLine} {
+			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height}), hitLines{startLine},firstLine(startLine),removedLines(0) {
 		};
 		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height, HitLine2D startLine,size_t precalculatedLines) :
-			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height }), hitLines{ startLine } {
+			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height }), hitLines{ startLine }, firstLine(startLine), removedLines(0) {
 			this->wallHitReflection(precalculatedLines + 1);
 		};
-		RectangleHitter(const HitRectangle2D& rect) : shape(rect), hitLines{ HitLine2D{0,0,0} } {
-		};
-		RectangleHitter(const HitRectangle2D& rect,const HitLine2D& startLine) : shape(rect), hitLines{ startLine } {
+		//RectangleHitter(const HitRectangle2D& rect) : shape(rect), hitLines{ HitLine2D{0,0,0} }, {
+		//};
+		RectangleHitter(const HitRectangle2D& rect,const HitLine2D& startLine) : shape(rect), hitLines{ startLine }, firstLine(startLine), removedLines(0) {
 		};
 
 

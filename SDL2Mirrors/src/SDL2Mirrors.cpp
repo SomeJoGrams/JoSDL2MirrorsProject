@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
         ////SDL_DestroyRenderer(mainRenderer);
         ////SDL_Quit();
         ////return 0;
-        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 300); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 10); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         currentLineIndex = traveledLine.lineIndex;
         time = traveledLine.traveledDistance / speed ; // v = s / t <=> s = v * t <=> t = s / v 
         time += 1;
