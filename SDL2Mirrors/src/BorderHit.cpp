@@ -424,8 +424,8 @@ namespace BorderHit
 					//double fixedYEndCoordinate = startPoint.y + pointYOffsetTo < 0 ? (startPoint.y + pointYOffsetTo) * -1 : (startPoint.y + pointYOffsetTo);
 					/*resultCutLines.push_back({ Position2D{endPoint.x - pointXOffsetFrom,std::abs(endPoint.y - pointYOffsetFrom)},
 						Position2D{endPoint.x, endPoint.y} });*/
-					resultCutLines.push_back(SimpleLine2D{ Position2D{ endPoint.x + pointXOffsetFrom,std::abs(endPoint.y + pointYOffsetFrom) },
-						Position2D{startPoint.x,std::abs(startPoint.y)} }); // the startPoint and endPoint are switched!
+					resultCutLines.push_back(SimpleLine2D{ Position2D{endPoint.x - pointXOffsetFrom,std::abs(endPoint.y - pointYOffsetFrom) },
+						Position2D{endPoint.x,std::abs(endPoint.y)} }); // the startPoint and endPoint are switched!
 					// store the already traveled Distance
 					break;
 				}
@@ -446,6 +446,8 @@ namespace BorderHit
 
 		//double distanceToTravelTrailStart = speed * (time - trailTime);
 
+
+
 		currentIndex = startIndex;
 		//startPoint = this->hitLines[startIndex].pos;
 		startPoint = this->hitLines[startIndex].pos;
@@ -454,6 +456,7 @@ namespace BorderHit
 		if (currentIndex == 0) { // if the line just stated only use the time from the starting point on
 			distanceToTravel = speed * (time - trailTime); // TODO maybe remove this to an use a negative time
 		}
+
 
 		if (const VerticalLine2D* vertLine = std::get_if<VerticalLine2D>(&line)) { // vertical lines will always stay vertical in a box
 			//auto yDistance = std::abs(endPoint.y - startPoint.y);
@@ -539,14 +542,15 @@ namespace BorderHit
 						pointXOffsetFrom = relLengths.first * overallLength * relativeStartDistance;
 						pointYOffsetFrom = relLengths.second * overallLength * relativeStartDistance;
 					}
+					
 
 					//double fixedYStartCoordinate = startPoint.y + pointXOffsetFrom < 0 ? (startPoint.y + pointXOffsetFrom) * -1 : (startPoint.y + pointXOffsetFrom);
 					//double fixedYEndCoordinate = startPoint.y + pointYOffsetTo < 0 ? (startPoint.y + pointYOffsetTo) * -1 : (startPoint.y + pointYOffsetTo);
-					resultCutLines.push_back({ Position2D{startPoint.x /*+ pointXOffsetFrom*/,std::abs(startPoint.y /*+ pointYOffsetFrom*/)},
-						Position2D{startPoint.x  + pointXOffsetTo,std::abs(startPoint.y + pointYOffsetTo)}});
+					resultCutLines.push_back({ Position2D{startPoint.x + pointXOffsetFrom,std::abs(startPoint.y + pointYOffsetFrom)},
+						Position2D{startPoint.x + pointXOffsetTo,std::abs(startPoint.y + pointYOffsetTo)}});
+
 					// store the already travelled Distance
 					TraveledLine traveledLine{ currentIndex,distanceToTravel};
-					std::cout << "cur size: " << resultCutLines.size() << "\n";
 					return std::pair{ resultCutLines, traveledLine };
 				}
 				else {
@@ -554,6 +558,7 @@ namespace BorderHit
 					double pointYOffsetFrom(0);
 					double startDistance = distanceToTravel - speed * trailTime; // with a trail the start can be on the line,this start is calculated here
 					std::pair<double, double> relLengths = AngleHelper::angleToRelativeTriangleLengths(this->hitLines[currentIndex].angle);
+
 
 					if (time - trailTime > 0 && startDistance > 0) { // we end on the line
 						double relativeStartDistance = startDistance / overallLength;
@@ -564,6 +569,7 @@ namespace BorderHit
 					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x + pointXOffsetFrom,std::abs(startPoint.y + pointYOffsetFrom)},
 						Position2D{endPoint.x,std::abs(endPoint.y)} });
 				}
+
 
 				distanceToTravel -= overallLength;
 				currentIndex += 1;

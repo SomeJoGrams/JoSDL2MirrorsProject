@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
         ////SDL_DestroyRenderer(mainRenderer);
         ////SDL_Quit();
         ////return 0;
-        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 2); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 300); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         currentLineIndex = traveledLine.lineIndex;
         time = traveledLine.traveledDistance / speed ; // v = s / t <=> s = v * t <=> t = s / v 
         time += 1;
@@ -246,8 +246,8 @@ int main(int argc, char* argv[])
             SDL_RenderDrawLine(mainRenderer, (int)curLine.startPos.x, (int)curLine.startPos.y, (int)curLine.endPos.x, (int)curLine.endPos.y);
         }
         //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
-        SDL_Delay(16); // wait 16 ms to reach 60 fps
         SDL_RenderPresent(mainRenderer);
+        SDL_Delay(16); // wait 16 ms to reach 60 fps
         SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(mainRenderer);
         SDL_SetRenderDrawColor(mainRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
