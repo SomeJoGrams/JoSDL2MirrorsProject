@@ -101,17 +101,25 @@ namespace BorderHit
 			&& pos.x <= (*this).shape.width + (*this).shape.pos.x && pos.x >= (*this).shape.pos.x;
 	}
 
-	void RectangleHitter::wallHitReflection(size_t reflections) {
+	void RectangleHitter::clearCache() {
+		this->hitLines = std::vector<HitLine2D>{ this->firstLine };
+		this->removedLines = 0;
+	}
+
+	void RectangleHitter::wallHitReflection(int reflections) {
 		// startLine
-		// hit right side
-		
 		HitLine2D startHitLine;
-		if (this->fixedSize() > reflections) { // when the (indexed)reflections are already calulcated just return
+		if (this->fixedSize() > reflections && reflections > 0) { // when the (indexed)reflections are already calulcated just return
 			return;
 		}
 		else {
-			//startHitLine = this->hitLines[this->hitLines.size() - 1];
-			startHitLine = this->getHitLineAtIndex(this->fixedSize() - 1);
+			if (reflections >= 0) {
+				startHitLine = this->getHitLineAtIndex(this->fixedSize() - 1);
+			}
+			else {
+				startHitLine = this->firstLine;
+			}
+			
 		}
 		HitLine2D currentHitLine(startHitLine);
 
@@ -122,8 +130,19 @@ namespace BorderHit
 
 		int foundReflections(0); // if the line the the edge directly 2 lines will be hit
 		int lastHitSide = 0; // topside = 1, rightSide = 2, botSide = 3, leftSide = 4
-		size_t endIndex = this->fixedSize() + reflections;
-		for (size_t startInd = this->fixedSize(); startInd < endIndex; startInd++) {
+		size_t startIndex;
+		size_t endIndex;
+		if (reflections >= 0) {
+			endIndex = this->fixedSize() + reflections;
+			startIndex = this->fixedSize();
+		}
+		else {
+			endIndex = reflections * -1;
+			startIndex = 0;
+			this->clearCache();
+		}
+
+		for (size_t startInd = startIndex; startInd < endIndex + 1; startInd++) {
 			foundReflections = 0;
 			std::variant<VerticalLine2D, StraightLine2D> straightPointLine = hitLineToStraightLine(startHitLine);
 			// TODO fix the case where the edge is hit directly, fix equal signs!
@@ -244,15 +263,14 @@ namespace BorderHit
 			this->hitLines.push_back(currentHitLine);
 		}
 		// avoid overflow by always keeping the first position, but removing the following elements
-		const size_t maxElementsStored = 15;
-		const size_t remainingElementsStart = 15 - 5;
-		if (this->hitLines.size() > maxElementsStored && reflections > this->fixedSize()) {
-			this->removedLines += this->hitLines.size() - remainingElementsStart;
+		const size_t maxElementsStored = 5;
+		const size_t removeLines = maxElementsStored - 2;
+		if (this->hitLines.size() > maxElementsStored) {
+			//this->removedLines += /*this->hitLines.size() - */removeLines;
+			this->removedLines += /*this->hitLines.size() - */removeLines;
 			//this->hitLines = std::vector<HitLine2D>(std::next(this->hitLines.begin(),remainingElementsStart), this->hitLines.end());
-			this->hitLines.erase(this->hitLines.begin(), std::next(this->hitLines.begin(), remainingElementsStart));
+			this->hitLines.erase(this->hitLines.begin(), std::next(this->hitLines.begin(), removeLines));
 		}
-		
-
 	}
 
 	std::vector<SimpleLine2D> RectangleHitter::getLines(size_t amount) {

@@ -98,15 +98,23 @@ namespace BorderHit
 		size_t removedLines;
 
 		bool insideRectangle(const Position2D& point);
-		void wallHitReflection(const size_t reflections);
+		void wallHitReflection(const int reflections);
+		void clearCache();
 
-		HitLine2D getHitLineAtIndex(size_t index) {
-			// TODO allow indices which have to go back far in the past to load with negative wallHitReflections
-			return this->hitLines[index - removedLines];
+
+		inline HitLine2D getHitLineAtIndex(size_t index) {
+			if (index < this->removedLines) { //index - removedLines < 0 use this comparison, bc size_t cant be negative
+				if (index == 5) {
+					std::cout << "here\n";
+				}
+				this->wallHitReflection((-1) * index);
+				return this->hitLines[index];
+			}// the index was removed due to caching only recent lines: calculate from the start
+			return this->hitLines[index - this->removedLines];
 		}
 
-		size_t fixedSize() {
-			return this->hitLines.size() + removedLines;
+		inline size_t fixedSize() {
+			return this->hitLines.size() + this->removedLines;
 		}
 
 	public:
