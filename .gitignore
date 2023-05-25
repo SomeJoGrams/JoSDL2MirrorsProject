@@ -369,3 +369,4 @@ extern/vcpkg/
 
 #server for reloading the html + ruby config
 /LiveReloadServer
+/enc_temp_folder
