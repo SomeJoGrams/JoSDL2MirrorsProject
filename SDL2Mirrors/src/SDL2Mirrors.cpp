@@ -238,8 +238,7 @@ int main(int argc, char* argv[])
         ////SDL_DestroyRenderer(mainRenderer);
         ////SDL_Quit();
         ////return 0;
-        std::cout << "the index: " << currentLineIndex << "\n";
-        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 3000); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 100); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         currentLineIndex = traveledLine.lineIndex;
         time = traveledLine.traveledDistance / speed ; // v = s / t <=> s = v * t <=> t = s / v 
         time += 1;

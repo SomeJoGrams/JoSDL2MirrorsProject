@@ -383,9 +383,6 @@ namespace BorderHit
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		size_t currentIndex = startIndex;
 		std::vector<SimpleLine2D> resultCutLines;
-		if (this->removedLines > 2) {
-			std::cout << "test\n";
-		}
 		Position2D startPoint = this->getHitLineAtIndex(startIndex).pos;//should probably cancel the excution instead, the coordinates should be negative
 		Position2D endPoint = this->getHitLineAtIndex(startIndex + 1).pos;
 		std::variant<VerticalLine2D, StraightLine2D> line = positionsToLine(startPoint, endPoint);
@@ -442,9 +439,6 @@ namespace BorderHit
 				}
 				currentIndex -= 1;
 				endPoint = this->getHitLineAtIndex(currentIndex).pos;
-				if (currentIndex == 13) {
-					std::cout << "stop here\n";
-				}
 				startPoint = this->getHitLineAtIndex(currentIndex - 1).pos;
 			}
 		}
