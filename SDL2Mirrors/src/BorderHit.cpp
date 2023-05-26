@@ -106,21 +106,25 @@ namespace BorderHit
 		this->removedLines = 0;
 	}
 
-	void RectangleHitter::wallHitReflection(int reflections) {
+	// for positive reflection calculate n new reflections , for negative start calculation from front if the index is not known
+	void RectangleHitter::wallHitReflection(const size_t reflections,const bool goBackwards) {
 		// startLine
 		HitLine2D startHitLine;
-		if (this->fixedSize() > reflections && reflections > 0) { // when the (indexed)reflections are already calulcated just return
+		if (reflections == 0) {
 			return;
 		}
+		//if (this->fixedSize() > reflections && reflections > 0) { // when the (indexed)reflections are already calulcated just return
+		//	return;
+		//}
+		//else {
+		
+		if (goBackwards){
+			startHitLine = this->firstLine;
+		}			
 		else {
-			if (reflections >= 0) {
-				startHitLine = this->getHitLineAtIndex(this->fixedSize() - 1);
-			}
-			else {
-				startHitLine = this->firstLine;
-			}
-			
+			startHitLine = this->getHitLineAtIndex(this->fixedSize() - 1);
 		}
+		//}
 		HitLine2D currentHitLine(startHitLine);
 
 		auto leftLine = VerticalLine2D{this->shape.pos.x};
@@ -132,17 +136,16 @@ namespace BorderHit
 		int lastHitSide = 0; // topside = 1, rightSide = 2, botSide = 3, leftSide = 4
 		size_t startIndex;
 		size_t endIndex;
-		if (reflections >= 0) {
+		if (reflections > 0) {
 			endIndex = this->fixedSize() + reflections;
 			startIndex = this->fixedSize();
 		}
 		else {
-			endIndex = reflections * -1;
+			endIndex = reflections;
 			startIndex = 0;
-			this->clearCache();
 		}
 
-		for (size_t startInd = startIndex; startInd < endIndex + 1; startInd++) {
+		for (size_t startInd = startIndex; startInd < endIndex; startInd++) {
 			foundReflections = 0;
 			std::variant<VerticalLine2D, StraightLine2D> straightPointLine = hitLineToStraightLine(startHitLine);
 			// TODO fix the case where the edge is hit directly, fix equal signs!
@@ -263,19 +266,21 @@ namespace BorderHit
 			this->hitLines.push_back(currentHitLine);
 		}
 		// avoid overflow by always keeping the first position, but removing the following elements
-		const size_t maxElementsStored = 5;
-		const size_t removeLines = maxElementsStored - 2;
-		if (this->hitLines.size() > maxElementsStored) {
+		const size_t maxElementsStored = 10;
+		const size_t removeLines = /*maxElementsStored - */2;
+		if (this->hitLines.size() > maxElementsStored + removeLines) {
 			//this->removedLines += /*this->hitLines.size() - */removeLines;
-			this->removedLines += /*this->hitLines.size() - */removeLines;
+			//this->removedLines += /*this->hitLines.size() - */removeLines;
+			this->removedLines += this->hitLines.size() - maxElementsStored;
 			//this->hitLines = std::vector<HitLine2D>(std::next(this->hitLines.begin(),remainingElementsStart), this->hitLines.end());
-			this->hitLines.erase(this->hitLines.begin(), std::next(this->hitLines.begin(), removeLines));
+			//this->hitLines.erase(this->hitLines.begin(), std::next(this->hitLines.begin(), removeLines));
+			this->hitLines.erase(this->hitLines.begin(), std::next(this->hitLines.begin(), this->hitLines.size() - maxElementsStored)); // remove the amount of stored lines
 		}
 	}
 
 	std::vector<SimpleLine2D> RectangleHitter::getLines(size_t amount) {
 		// TODO fix for new size saving method
-		this->wallHitReflection(amount + 1); // 1 reflection creates a single point , however we want the amount of lines
+		this->wallHitReflection(amount + 1,false); // 1 reflection creates a single point , however we want the amount of lines
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		std::vector<SimpleLine2D> result;
 		Position2D startPoint;
@@ -308,7 +313,7 @@ namespace BorderHit
 	}
 
 	SimpleLine2D RectangleHitter::getLine(size_t index, int startPercent, int endPercent) {
-		this->wallHitReflection(index + 1); // 1 reflection creates a single point , however we want the amount of 
+		this->wallHitReflection(index + 1,false); // 1 reflection creates a single point , however we want the amount of 
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		SimpleLine2D resultCutLine;
 		Position2D startPoint;
@@ -375,10 +380,12 @@ namespace BorderHit
 
 
 	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeedWithTrailTime(size_t startIndex, int speed, int time,int trailTime) {
-		this->wallHitReflection(startIndex + 1); // 1 reflection creates a single point , however we want the amount of 
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 		size_t currentIndex = startIndex;
 		std::vector<SimpleLine2D> resultCutLines;
+		if (this->removedLines > 2) {
+			std::cout << "test\n";
+		}
 		Position2D startPoint = this->getHitLineAtIndex(startIndex).pos;//should probably cancel the excution instead, the coordinates should be negative
 		Position2D endPoint = this->getHitLineAtIndex(startIndex + 1).pos;
 		std::variant<VerticalLine2D, StraightLine2D> line = positionsToLine(startPoint, endPoint);
@@ -391,12 +398,8 @@ namespace BorderHit
 			// find the start index
 			double backwardsTravelDistance = speed * std::abs(time - trailTime);
 			// find the position where the trail starts
-			if (currentIndex > 0) {
-				//resultCutLines.push_back(SimpleLine2D{ Position2D{endPoint.x,endPoint.y}, // ignore the position
-				//		Position2D{endPoint.x,endPoint.y}
-				//	});
-				startPoint = this->getHitLineAtIndex(currentIndex - 1).pos;// TODO calclulate straight line for index 0
-			}
+			startPoint = this->getHitLineAtIndex(currentIndex - 1).pos;// TODO calclulate straight line for index 0
+			
 			
 			while (backwardsTravelDistance > 0) {
 				if (currentIndex == 0) {
@@ -439,6 +442,9 @@ namespace BorderHit
 				}
 				currentIndex -= 1;
 				endPoint = this->getHitLineAtIndex(currentIndex).pos;
+				if (currentIndex == 13) {
+					std::cout << "stop here\n";
+				}
 				startPoint = this->getHitLineAtIndex(currentIndex - 1).pos;
 			}
 		}
@@ -476,11 +482,6 @@ namespace BorderHit
 				currentIndex += 1;
 				startPoint = this->getHitLineAtIndex(currentIndex).pos;
 				endPoint = this->getHitLineAtIndex(currentIndex + 1).pos;
-
-
-				if (currentIndex > this->fixedSize()) {
-					this->wallHitReflection(currentIndex + 1);
-				}
 			}
 		}
 		else { // Straight Line
@@ -546,10 +547,6 @@ namespace BorderHit
 				/*startPoint = this->hitLines[currentIndex].pos;
 				endPoint = this->hitLines[currentIndex + 1].pos;*/
 				startPoint = this->getHitLineAtIndex(currentIndex).pos;
-				if (currentIndex >= this->fixedSize() - 1) {
-					this->wallHitReflection(currentIndex + 1);
-				}
-				
 				endPoint = this->getHitLineAtIndex(currentIndex + 1).pos;
 
 

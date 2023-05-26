@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     int screenXSize = 640;
     int screenYSize = 480;
 
-    BorderHit::RectangleHitter hitter(0, 0, screenXSize,screenYSize, BorderHit::HitLine2D{ BorderHit::Position2D{100,-370}, 260},4);
+    BorderHit::RectangleHitter hitter(0, 0, screenXSize,screenYSize, BorderHit::HitLine2D{ BorderHit::Position2D{100,-370}, 260},1);
     //BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-240}, 35 });
     
     //auto line = hitter.getLine(0, 5, 15);
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 
     
     //double speed = 10;
-    double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.01; // the diagonal is used to calculate the speed;
+    double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.11; // the diagonal is used to calculate the speed;
     //double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.01; // one percent of the diagonal
 
     int time = 0;
@@ -238,7 +238,8 @@ int main(int argc, char* argv[])
         ////SDL_DestroyRenderer(mainRenderer);
         ////SDL_Quit();
         ////return 0;
-        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 2000); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        std::cout << "the index: " << currentLineIndex << "\n";
+        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 3000); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         currentLineIndex = traveledLine.lineIndex;
         time = traveledLine.traveledDistance / speed ; // v = s / t <=> s = v * t <=> t = s / v 
         time += 1;

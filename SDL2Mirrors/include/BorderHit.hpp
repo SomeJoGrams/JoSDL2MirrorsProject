@@ -98,18 +98,20 @@ namespace BorderHit
 		size_t removedLines;
 
 		bool insideRectangle(const Position2D& point);
-		void wallHitReflection(const int reflections);
+		void wallHitReflection(const size_t reflections,const bool goBackwards);
 		void clearCache();
 
 
 		inline HitLine2D getHitLineAtIndex(size_t index) {
-			if (index < this->removedLines) { //index - removedLines < 0 use this comparison, bc size_t cant be negative
-				if (index == 5) {
-					std::cout << "here\n";
-				}
-				this->wallHitReflection((-1) * index);
-				return this->hitLines[index];
+			if (index < this->removedLines) { //index - removedLines < 0 use this comparison, elements from the start have already been removed
+				this->clearCache();
+				this->wallHitReflection(index,true); // genereate up to the index from the start
+				return this->hitLines[index - this->removedLines];
 			}// the index was removed due to caching only recent lines: calculate from the start
+			// fixed size is the amount of current lines  
+			if (index > this->fixedSize() - 1) {
+				this->wallHitReflection(index - this->fixedSize() + 1,false);
+			}
 			return this->hitLines[index - this->removedLines];
 		}
 
@@ -126,7 +128,7 @@ namespace BorderHit
 		};
 		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height, HitLine2D startLine,size_t precalculatedLines) :
 			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height }), hitLines{ startLine }, firstLine(startLine), removedLines(0) {
-			this->wallHitReflection(precalculatedLines + 1);
+			this->wallHitReflection(precalculatedLines + 1,false);
 		};
 		//RectangleHitter(const HitRectangle2D& rect) : shape(rect), hitLines{ HitLine2D{0,0,0} }, {
 		//};
