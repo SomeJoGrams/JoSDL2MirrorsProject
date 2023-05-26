@@ -386,6 +386,7 @@ namespace BorderHit
 
 	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeedWithTrailTime(size_t startIndex, int speed, int time,int trailTime) {
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
+
 		size_t currentIndex = startIndex;
 		std::vector<SimpleLine2D> resultCutLines;
 		Position2D startPoint = this->getHitLineAtIndex(startIndex).pos;//should probably cancel the excution instead, the coordinates should be negative
@@ -553,4 +554,20 @@ namespace BorderHit
 		}
 		return std::pair{ resultCutLines, TraveledLine{currentIndex,(double)time * speed} };
 	}
+
+	std::vector<SimpleLine2D> SimpleRectangleHitter::linesTrailTime(int speed, int trailTime, int timeOffset) {
+		auto [lines, traveledLine] = this->getLinesWithSpeedWithTrailTime(this->currentLineIndex, speed, this->time, trailTime); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+		this->currentLineIndex = traveledLine.lineIndex;
+		this->time = (traveledLine.traveledDistance / speed) + timeOffset; // v = s / t <=> s = v * t <=> t = s / v 
+		return lines;
+	}
+
+	std::vector<SimpleLine2D> SimpleRectangleHitter::linesTrailLength(int speed, int length, int timeOffset) {
+		int timeLength = length / speed; // v = s/t <=> s = v * t <=> t = s / v
+		auto [lines, traveledLine] = this->getLinesWithSpeedWithTrailLength(this->currentLineIndex, speed, this->time, timeLength); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+		this->currentLineIndex = traveledLine.lineIndex;
+		this->time = (traveledLine.traveledDistance / speed) + timeOffset; // v = s / t <=> s = v * t <=> t = s / v 
+		return lines;
+	}
+
 }
