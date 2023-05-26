@@ -140,6 +140,7 @@ namespace BorderHit
 		SimpleLine2D getLine(const size_t index,const int startPercent,const int endPercent);
 		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeed(size_t startIndex, int speed, int time);
 		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeedWithTrailTime(size_t startIndex, int speed, int time, int trailTime);
+		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeedWithTrailLength(size_t startIndex, int speed, int time, int distance);
 	};
 
 

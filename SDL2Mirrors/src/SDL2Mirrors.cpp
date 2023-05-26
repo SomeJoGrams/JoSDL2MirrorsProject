@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 
     
     //double speed = 10;
-    double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.11; // the diagonal is used to calculate the speed;
+    double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.01; // the diagonal is used to calculate the speed;
     //double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.01; // one percent of the diagonal
 
     int time = 0;
@@ -238,7 +238,8 @@ int main(int argc, char* argv[])
         ////SDL_DestroyRenderer(mainRenderer);
         ////SDL_Quit();
         ////return 0;
-        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 100); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        //auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 15); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailLength(currentLineIndex, speed, time, 15); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         currentLineIndex = traveledLine.lineIndex;
         time = traveledLine.traveledDistance / speed ; // v = s / t <=> s = v * t <=> t = s / v 
         time += 1;
