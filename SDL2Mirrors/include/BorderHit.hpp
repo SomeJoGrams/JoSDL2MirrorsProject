@@ -139,8 +139,8 @@ namespace BorderHit
 		std::vector<SimpleLine2D> getLines(const size_t amount);
 		SimpleLine2D getLine(const size_t index,const int startPercent,const int endPercent);
 		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeed(size_t startIndex, int speed, int time);
-		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeedWithTrailTime(size_t startIndex, double speed, double time, int trailTime);
-		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeedWithTrailLength(size_t startIndex, int speed, int time, int length);
+		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeedWithTrailTime(size_t startIndex, double speed, double time, double trailTime);
+		std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithSpeedWithTrailLength(size_t startIndex, double speed, double time, double length);
 		//std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithLength(size_t startIndex, int time, int length);
 	
 	};
@@ -154,9 +154,9 @@ namespace BorderHit
 
 		}
 
-		std::vector<SimpleLine2D> linesTrailTime(int speed, int trailTime,int timeOffset);
+		std::vector<SimpleLine2D> linesTrailTime(double speed, double trailTime,double timeOffset);
 
-		std::vector<SimpleLine2D> linesTrailLength(int speed, int length, int timeOffset);
+		std::vector<SimpleLine2D> linesTrailLength(double speed, double length, double timeOffset);
 
 
 
