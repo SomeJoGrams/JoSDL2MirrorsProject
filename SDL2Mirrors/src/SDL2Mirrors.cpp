@@ -234,7 +234,6 @@ int main(int argc, char* argv[])
         ////}
         ////std::cout << "finished\n";
         ////SDL_Delay(1000);
-
         ////SDL_DestroyWindow(window);
         ////SDL_DestroyRenderer(mainRenderer);
         ////SDL_Quit();

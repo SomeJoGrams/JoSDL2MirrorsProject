@@ -378,12 +378,6 @@ namespace BorderHit
 	}
 	
 
-	std::pair<std::vector<SimpleLine2D>, TraveledLine> RectangleHitter::getLinesWithSpeedWithTrailLength(size_t startIndex, int speed, int time, int distance) {
-		int timeLength = distance / speed; // v = s/t <=> s = v * t <=> t = s / v
-		return this->getLinesWithSpeedWithTrailTime(startIndex, speed, time, timeLength);
-	}
-
-
 	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeedWithTrailTime(size_t startIndex, int speed, int time,int trailTime) {
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 
@@ -553,6 +547,18 @@ namespace BorderHit
 			}
 		}
 		return std::pair{ resultCutLines, TraveledLine{currentIndex,(double)time * speed} };
+	}
+
+	std::pair<std::vector<SimpleLine2D>, TraveledLine> RectangleHitter::getLinesWithSpeedWithTrailLength(size_t startIndex, int speed, int time, int distance) {
+		int timeLength = distance / speed; // v = s/t <=> s = v * t <=> t = s / v
+		return this->getLinesWithSpeedWithTrailTime(startIndex, speed, time, timeLength);
+	}
+
+	std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithLength(size_t startIndex, int time, int length) {
+		size_t ind(0);
+		double distance(length);
+		std::vector<SimpleLine2D> resultVector;
+		return std::pair{resultVector, TraveledLine{ind, distance}};
 	}
 
 	std::vector<SimpleLine2D> SimpleRectangleHitter::linesTrailTime(int speed, int trailTime, int timeOffset) {
