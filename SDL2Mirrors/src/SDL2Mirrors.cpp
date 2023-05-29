@@ -167,8 +167,8 @@ int main(int argc, char* argv[])
     //    SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
     //}
   
-    int fps = 60;
-    int millliseconds = std::ceil<int>(1000/60);
+    double fps = 60;
+    double millliseconds = std::ceil(1000/60);
 
 
     SDL_RenderPresent(mainRenderer);
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
         }
         //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
         SDL_RenderPresent(mainRenderer);
-        SDL_Delay(16); // wait 16 ms to reach 60 fps
+        SDL_Delay(millliseconds); // wait 16 ms to reach 60 fps
         SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(mainRenderer);
         SDL_SetRenderDrawColor(mainRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
