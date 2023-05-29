@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
     //}
   
     int fps = 60;
-    int millliseconds = std::ceil(1000/60);
+    int millliseconds = std::ceil<int>(1000/60);
 
 
     SDL_RenderPresent(mainRenderer);
