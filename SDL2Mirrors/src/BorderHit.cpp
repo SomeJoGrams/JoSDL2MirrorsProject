@@ -390,56 +390,78 @@ namespace BorderHit
 			return std::pair{ resultCutLines, TraveledLine{startIndex,0} };
 		}
 
-		// determine the points of the past, every line that is stepped over should be added, this is needed bc we change the index from where we start and not just the time!
+		 //determine the points of the past, every line that is stepped over should be added, this is needed bc we change the index from where we start and not just the time!
 		if (trailTime > 0 && time - trailTime < 0) { // we have to go back to the last start Indices, only the negative ranges of time - trailTime have to be looked at here
 			// find the start index
 			double backwardsTravelDistance = speed * std::abs(time - trailTime);
 			// find the position where the trail starts
 			startPoint = this->getHitLineAtIndex(currentIndex - 1).pos;// TODO calclulate straight line for index 0
-			
-			
-			while (backwardsTravelDistance > 0) {
-				if (currentIndex == 0) {
-					break;
-					//startPoint = this->hitLines[currentIndex].pos;
+			if (const VerticalLine2D* vertLine = std::get_if<VerticalLine2D>(&line)) { // vertical lines will always stay vertical in a box
+				while (backwardsTravelDistance > 0) {
+					auto overallLength = position2Ddistance(endPoint, startPoint);
+					if (backwardsTravelDistance < overallLength) {
+						// only travel on the line
+						//startPoint.y + distanceToTravel
+						double signedDistance = backwardsTravelDistance; // decide the direction in which to go
+						resultCutLines.push_back({ Position2D{startPoint.x,std::abs(startPoint.y )},
+							Position2D{startPoint.x,std::abs(startPoint.y + signedDistance)} });
+						// store the already traveled Distance
+						TraveledLine traveledLine{ currentIndex,backwardsTravelDistance };
+						return std::pair{ resultCutLines, traveledLine};
+					}
+					else {
+						resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
+							Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly from point to point
+					}
+					backwardsTravelDistance -= overallLength;
+					currentIndex += 1;
+					startPoint = this->getHitLineAtIndex(currentIndex).pos;
+					endPoint = this->getHitLineAtIndex(currentIndex + 1).pos;
 				}
-				endPoint = this->getHitLineAtIndex(currentIndex).pos;
-				auto overallLength = position2Ddistance(endPoint, startPoint);
-				// todo check equality
-				if (backwardsTravelDistance < overallLength) {
-					// only travel on the line
-					//startPoint.y + distanceToTravel
-					// idea: calculate the relative distance and then go on just like in getLine
-					double relativeDistance = backwardsTravelDistance / overallLength;
-					//auto relativeStartPosition = overallDistance;
-					//auto relativeEndPosition = overallDistance;
-					// the from offset is the position where to line is started
-					double pointYOffsetFrom(0);
-					double pointXOffsetFrom(0);
-					double pointYOffsetTo(0);
-					double pointXOffsetTo(0);
-					double xLength(0);
-					double yLength(0);
-					std::pair<double,double> relLengths = AngleHelper::angleToRelativeTriangleLengths(this->getHitLineAtIndex(currentIndex - 1).angle);
-					pointXOffsetFrom = relLengths.first * overallLength * relativeDistance;
-					pointYOffsetFrom = relLengths.second * overallLength * relativeDistance;
-
-					resultCutLines.push_back(SimpleLine2D{ Position2D{endPoint.x - pointXOffsetFrom,std::abs(endPoint.y - pointYOffsetFrom) },
-						Position2D{endPoint.x,std::abs(endPoint.y)} }); // the startPoint and endPoint are switched!
-					// store the already traveled Distance
-					break;
+			}
+			else {
+				while (backwardsTravelDistance > 0) {
+					if (currentIndex == 0) {
+						break;
+						//startPoint = this->hitLines[currentIndex].pos;
+					}
+					endPoint = this->getHitLineAtIndex(currentIndex).pos;
+					auto overallLength = position2Ddistance(endPoint, startPoint);
+					// todo check equality
+					if (backwardsTravelDistance < overallLength) {
+						// only travel on the line
+						//startPoint.y + distanceToTravel
+						// idea: calculate the relative distance and then go on just like in getLine
+						double relativeDistance = backwardsTravelDistance / overallLength;
+						//auto relativeStartPosition = overallDistance;
+						//auto relativeEndPosition = overallDistance;
+						// the from offset is the position where to line is started
+						double pointYOffsetFrom(0);
+						double pointXOffsetFrom(0);
+						double pointYOffsetTo(0);
+						double pointXOffsetTo(0);
+						double xLength(0);
+						double yLength(0);
+						std::pair<double, double> relLengths = AngleHelper::angleToRelativeTriangleLengths(this->getHitLineAtIndex(currentIndex - 1).angle);
+						pointXOffsetFrom = relLengths.first * overallLength * relativeDistance;
+						pointYOffsetFrom = relLengths.second * overallLength * relativeDistance;
+						resultCutLines.push_back(SimpleLine2D{ Position2D{endPoint.x - pointXOffsetFrom,std::abs(endPoint.y - pointYOffsetFrom) },
+							Position2D{endPoint.x,std::abs(endPoint.y)} }); // the startPoint and endPoint are switched!
+						// store the already traveled Distance
+						break;
+					}
+					else {
+						resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
+							Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly included, bc the trailtime is big
+					}
+					backwardsTravelDistance -= overallLength;
+					if (currentIndex == 0 || currentIndex == 1) {
+						break;
+					}
+					currentIndex -= 1;
+					endPoint = this->getHitLineAtIndex(currentIndex).pos;
+					startPoint = this->getHitLineAtIndex(currentIndex - 1).pos;
 				}
-				else {
-					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
-						Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly included, bc the trailtime is big
-				}
-				backwardsTravelDistance -= overallLength;
-				if (currentIndex == 0 || currentIndex == 1) {
-					break;
-				}
-				currentIndex -= 1;
-				endPoint = this->getHitLineAtIndex(currentIndex).pos;
-				startPoint = this->getHitLineAtIndex(currentIndex - 1).pos;
 			}
 		}
 
@@ -459,17 +481,22 @@ namespace BorderHit
 				if (distanceToTravel < overallLength) {
 					// only travel on the line
 					//startPoint.y + distanceToTravel
-					double signedDistance = startPoint.y > endPoint.y ? -1 * distanceToTravel : distanceToTravel; // decide the direction in which to go
-					double trailTimeDistance = speed * time; // problem the trail might also influece in the goal point of the last point, when the time is smaller than the trail time
-					resultCutLines.push_back({ Position2D{startPoint.x,std::abs(startPoint.y + trailTimeDistance)},
-						Position2D{startPoint.x,std::abs(startPoint.y + signedDistance)} });
+					double pointYOffsetFrom = distanceToTravel - speed * trailTime;
+					//pointYOffsetFrom -= speed * trailTime;
+					//double trailTimeDistance = speed * time; // problem the trail might also influece in the goal point of the last point, when the time is smaller than the trail time
+					resultCutLines.push_back({ Position2D{startPoint.x,std::abs(startPoint.y + pointYOffsetFrom)},
+						Position2D{startPoint.x,std::abs(startPoint.y + distanceToTravel)} });
 					// store the already traveled Distance
 					TraveledLine traveledLine{currentIndex,distanceToTravel};
 					return std::pair{ resultCutLines, traveledLine};
 				}
 				else {
-					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
-						Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly from point to point
+					double pointYOffsetFrom = distanceToTravel - speed * trailTime; // with a trail the start can be on the line,this start is calculated here
+					// the line is completly in the trail
+					resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y + pointYOffsetFrom)},
+						Position2D{endPoint.x,std::abs(endPoint.y)} });
+					//resultCutLines.push_back(SimpleLine2D{ Position2D{startPoint.x,std::abs(startPoint.y)},
+					//	Position2D{endPoint.x,std::abs(endPoint.y)} }); // the line is completly from point to point
 				}
 				
 				distanceToTravel -= overallLength;

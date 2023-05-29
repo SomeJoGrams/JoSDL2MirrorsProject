@@ -68,7 +68,7 @@ constexpr inline double reflectAngleRight(double inputAngle) {
 }
 
 constexpr inline double reflectAngleBot(double inputAngle) {
-	if (inputAngle> 90 && inputAngle< 180) {
+	if (inputAngle> 90 && inputAngle<= 180) {
 		return 180 - inputAngle;
 	}
 	else { // between 180 and 270
