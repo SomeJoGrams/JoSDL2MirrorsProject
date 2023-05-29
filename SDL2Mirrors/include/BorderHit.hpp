@@ -37,13 +37,13 @@ namespace BorderHit
 
 	inline bool facesRight(const HitLine2D& line) { // the angle in degrees is "going up"
 		//return line.angle > 0 && line.angle < 180;
-		return line.angle > 0 && line.angle <= 180;
+		return line.angle > 0 && line.angle < 180;
 	}
 	inline bool facesTop(const HitLine2D& line) {
 		return (line.angle > 270 && line.angle <= 360) || (line.angle >= 0 && line.angle < 90);
 	}
 	inline bool facesLeft(const HitLine2D& line) {
-		return line.angle > 180 && line.angle <= 360;
+		return line.angle > 180 && line.angle < 360;
 	}
 	inline bool facesBot(const HitLine2D& line) {
 		return line.angle > 90 && line.angle <= 270;
