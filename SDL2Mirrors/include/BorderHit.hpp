@@ -90,12 +90,31 @@ namespace BorderHit
 	std::variant<VerticalLine2D, StraightLine2D> hitLineToStraightLine(const HitLine2D& hitLine);
 	std::variant<VerticalLine2D, StraightLine2D> positionsToLine(const Position2D pos1, const Position2D pos2);
 
+	class PositionScaler {
+	private:
+		std::vector<SimpleLine2D> lines;
+		double sizeX;
+		double sizeY;
+
+	public:
+		PositionScaler(std::vector<SimpleLine2D> vec, double sizeXP, double sizeYP) : lines(vec), sizeX(sizeXP), sizeY(sizeYP) {
+
+		}
+		void addLine(const SimpleLine2D& line);
+
+		std::vector<SimpleLine2D> returnLines();
+
+		std::vector<SimpleLine2D> returnScaledLines(double scaleX,double scaleY);
+	};
+
+
 	class RectangleHitter {
 	private:
 		HitRectangle2D shape;
 		std::vector<HitLine2D> hitLines;
 		HitLine2D firstLine;
 		size_t removedLines;
+		PositionScaler posScaler;
 
 		bool insideRectangle(const Position2D& point);
 		void wallHitReflection(const size_t reflections,const bool goBackwards);
@@ -123,17 +142,17 @@ namespace BorderHit
 		inline HitLine2D startLine() {
 			return firstLine;
 		}
-		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height,HitLine2D startLine) :
-			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height}), hitLines{startLine},firstLine(startLine),removedLines(0) {
+		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height,HitLine2D startLine,double sizeX,double sizeY) :
+			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height }), hitLines{ startLine }, firstLine(startLine), removedLines(0), posScaler(std::vector<SimpleLine2D>(),sizeX,sizeY) {
 		};
-		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height, HitLine2D startLine,size_t precalculatedLines) :
-			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height }), hitLines{ startLine }, firstLine(startLine), removedLines(0) {
+		RectangleHitter(const double rectXPos, const double rectYPos, double width, double height, HitLine2D startLine,size_t precalculatedLines,double sizeX,double sizeY) :
+			shape(HitRectangle2D{ Position2D{rectXPos,rectYPos}, width,height }), hitLines{ startLine }, firstLine(startLine), removedLines(0), posScaler(std::vector<SimpleLine2D>(), sizeX, sizeY) {
 			this->wallHitReflection(precalculatedLines + 1,false);
 		};
 		//RectangleHitter(const HitRectangle2D& rect) : shape(rect), hitLines{ HitLine2D{0,0,0} }, {
 		//};
-		RectangleHitter(const HitRectangle2D& rect,const HitLine2D& startLine) : shape(rect), hitLines{ startLine }, firstLine(startLine), removedLines(0) {
-		};
+		//RectangleHitter(const HitRectangle2D& rect,const HitLine2D& startLine) : shape(rect), hitLines{ startLine }, firstLine(startLine), removedLines(0) {
+		//};
 
 
 		std::vector<SimpleLine2D> getLines(const size_t amount);

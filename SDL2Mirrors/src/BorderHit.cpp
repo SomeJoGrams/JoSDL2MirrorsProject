@@ -595,4 +595,22 @@ namespace BorderHit
 		return lines;
 	}
 
+
+	void PositionScaler::addLine(const SimpleLine2D& line) {
+		this->lines.push_back(line);
+	}
+
+	std::vector<SimpleLine2D> PositionScaler::returnLines() {
+		std::vector<SimpleLine2D> result = this->lines;
+		this->lines.clear();
+		return result;
+	}
+
+	std::vector<SimpleLine2D> PositionScaler::returnScaledLines(double scaleX, double scaleY) {
+		std::vector<SimpleLine2D> result = this->lines;
+		// TODO map
+		this->lines.clear();
+		return result;
+	}
+
 }
