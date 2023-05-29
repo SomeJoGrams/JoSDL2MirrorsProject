@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
         auto lines = simpleHitter.linesTrailLength(speed, 200, 1);
         time += 1;
         for (const auto& curLine : lines) {
-            SDL_RenderDrawLine(mainRenderer, std::round(curLine.startPos.x), std::round(curLine.startPos.y), std::round(curLine.endPos.x), std::round(curLine.endPos.y));
+            SDL_RenderDrawLine(mainRenderer, std::round<int>(curLine.startPos.x), std::round<int>(curLine.startPos.y), std::round<int>(curLine.endPos.x), std::round<int>(curLine.endPos.y));
         }
         //SDL_RenderDrawLine(mainRenderer, (int)line.startPos.x, (int)line.startPos.y, (int)line.endPos.x, (int)line.endPos.y);
         SDL_RenderPresent(mainRenderer);
