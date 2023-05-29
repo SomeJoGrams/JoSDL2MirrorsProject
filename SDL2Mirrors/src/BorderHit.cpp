@@ -378,7 +378,7 @@ namespace BorderHit
 	}
 	
 
-	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeedWithTrailTime(size_t startIndex, int speed, int time,int trailTime) {
+	std::pair<std::vector<SimpleLine2D>,TraveledLine> RectangleHitter::getLinesWithSpeedWithTrailTime(size_t startIndex, double speed, double time,int trailTime) {
 		// f.e. 1 line => 2 points / reflections, 2 lines => 3 points , ...
 
 		size_t currentIndex = startIndex;
@@ -581,12 +581,6 @@ namespace BorderHit
 		return this->getLinesWithSpeedWithTrailTime(startIndex, speed, time, timeLength);
 	}
 
-	std::pair<std::vector<SimpleLine2D>, TraveledLine> getLinesWithLength(size_t startIndex, int time, int length) {
-		size_t ind(0);
-		double distance(length);
-		std::vector<SimpleLine2D> resultVector;
-		return std::pair{resultVector, TraveledLine{ind, distance}};
-	}
 
 	std::vector<SimpleLine2D> SimpleRectangleHitter::linesTrailTime(int speed, int trailTime, int timeOffset) {
 		auto [lines, traveledLine] = this->getLinesWithSpeedWithTrailTime(this->currentLineIndex, speed, this->time, trailTime); // always draw a fixed distance if a line gets finished the next lines also have to be drawn

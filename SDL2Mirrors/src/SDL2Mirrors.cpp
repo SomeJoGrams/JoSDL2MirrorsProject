@@ -183,10 +183,10 @@ int main(int argc, char* argv[])
     
     //double speed = 10;
     // TODO uneven speed like 10.8
-    double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * (double)0.01; // the diagonal is used to calculate the speed;
+    double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * (double)0.001; // the diagonal is used to calculate the speed;
     //double speed = std::sqrt(screenXSize * screenXSize + screenYSize * screenYSize) * 0.01; // one percent of the diagonal
 
-    int time = 0;
+    double time = 0;
 
 #ifdef __EMSCRIPTEN__ // the main loop has to be handled separatley
     emscripten_request_animation_frame_loop(one_iter, 0);
@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
         //time = traveledLine.traveledDistance / speed ; // v = s / t <=> s = v * t <=> t = s / v 
         //auto lines = simpleHitter.linesTrailTime(speed, 15, 1);
         //auto lines = simpleHitter.linesTrailLength(speed, 200, 1);
-        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 3); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
+        auto [lines, traveledLine] = hitter.getLinesWithSpeedWithTrailTime(currentLineIndex, speed, time, 10); // always draw a fixed distance if a line gets finished the next lines also have to be drawn
         currentLineIndex = traveledLine.lineIndex;
         time = traveledLine.traveledDistance / speed; // v = s / t <=> s = v * t <=> t = s / v 
         time += 1;
