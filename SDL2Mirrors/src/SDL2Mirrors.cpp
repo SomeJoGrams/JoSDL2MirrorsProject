@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     int screenXSize = 640;
     int screenYSize = 480;
 
-    BorderHit::RectangleHitter hitter(0, 0, screenXSize,screenYSize, BorderHit::HitLine2D{ BorderHit::Position2D{100,-370}, 75},1);
+    BorderHit::RectangleHitter hitter(0, 0, screenXSize,screenYSize, BorderHit::HitLine2D{ BorderHit::Position2D{100,-370}, 75},1, screenXSize,screenYSize);
     BorderHit::SimpleRectangleHitter simpleHitter(hitter);
     
     //BorderHit::RectangleHitter hitter(0, 0, 640, 480, BorderHit::HitLine2D{ BorderHit::Position2D{320,-240}, 35 });
