@@ -363,7 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # vcpkg , new installs should run theinstall script
-extern/vcpkg/
+#/extern/vcpkg/
 /vcpkg_installed
 /.vscode
 
