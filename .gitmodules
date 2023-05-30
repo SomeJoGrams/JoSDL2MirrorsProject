@@ -1,6 +1,6 @@
 [submodule ".\\SDL2BaseVCPKG\\extern\\vcpkg"]
 	path = .\\SDL2BaseVCPKG\\extern\\vcpkg
 	url = https://github.com/microsoft/vcpkg.git
-[submodule "SDL2Fractals/extern/vcpkg"]
-	path = SDL2Fractals/extern/vcpkg
+[submodule "SDL2Mirrors/extern/vcpkg"]
+	path = SDL2Mirrors/extern/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
