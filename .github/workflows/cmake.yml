@@ -23,7 +23,7 @@ jobs:
         
         - name: Cache vcpkg packages
           id: cache-vcpkg  
-          uses: action/cache@v3
+          uses: actions/cache@v3
           env:
             cache-name: cache-vcpkg-packages
           with:
