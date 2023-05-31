@@ -23,8 +23,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    -   name: go to vcpkg extern dir
+        run: cd ${{github.workspace}}/SDL2Mirrors/extern
+
     - name: init vcpkg
-      run: ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/bootstrap-vcpkg.bat
+      run: ./vcpkg/bootstrap-vcpkg.bat
+
 
     -   name: vc files
         run: ls ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/
@@ -35,6 +39,9 @@ jobs:
 
     -   name: vc files
         run: ls ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/
+
+    - name: reurn to top dir
+      run: cd ${{github.workspace}}
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
