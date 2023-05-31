@@ -14,12 +14,12 @@ env:
 
 jobs:
 
-  createWindowsx64:
+  createEmscripten:
     runs-on: windows-latest
 
     steps:
         - uses: actions/checkout@v3
-        
+        - uses: mymindstorm/setup-emsdk@v12
         
         - name: Cache vcpkg packages
           id: cache-vcpkg  
@@ -53,7 +53,7 @@ jobs:
           run: ls ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/
 
         - name: Configure CMake
-          run: cmake -B ${{github.workspace}}/build --preset "x64-release" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          run: cmake -B ${{github.workspace}}/build --preset "emscriptenWindows-debug" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
 
