@@ -27,8 +27,7 @@ Param(
   [parameter(Mandatory=$true)]
   [string]$ImageName,
   [parameter(Mandatory=$false)]
-  [string]$Prefix = "PrLin-",
-  [switch]$AddAndroidContainerRegistryPermissions
+  [string]$Prefix = "PrLin-"
 )
 
 $Location = 'eastasia'
@@ -66,8 +65,7 @@ $Vmss = New-AzVmssConfig `
   -UpgradePolicyMode Manual `
   -EvictionPolicy Delete `
   -Priority Spot `
-  -MaxPrice -1 `
-  -IdentityType SystemAssigned
+  -MaxPrice -1
 
 $NicName = $ResourceGroupName + 'NIC'
 New-AzNetworkInterface `
@@ -105,22 +103,10 @@ $Vmss = Set-AzVmssBootDiagnostic `
   -VirtualMachineScaleSet $Vmss `
   -Enabled $true
 
-$VmssCreated = New-AzVmss `
+New-AzVmss `
   -ResourceGroupName $ResourceGroupName `
   -Name $VmssName `
   -VirtualMachineScaleSet $Vmss
-
-if ($AddAndroidContainerRegistryPermissions) {
-  $spID = $VmssCreated.Identity.PrincipalId
-
-  $acrGroup = "And-Registry"
-  $acrName = "AndContainerRegistry"
-  
-  $resourceID = (Get-AzContainerRegistry -ResourceGroupName $acrGroup -Name $acrName).Id
-
-  # needs admin privileges
-  New-AzRoleAssignment -ObjectId $spID -Scope $resourceID -RoleDefinitionName AcrPull
-}
 
 Write-Host "Location: $Location"
 Write-Host "Resource group name: $ResourceGroupName"

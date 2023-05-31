@@ -6,7 +6,7 @@ version=${majver}.${minver}.${relver}-beta3
 abiver=51
 
 prefix=@PREFIX@
-multilib=lib
+multilib=@LJIT_LIBDIR@
 exec_prefix=${prefix}
 libdir=${exec_prefix}/${multilib}
 libname=lua${abiver}

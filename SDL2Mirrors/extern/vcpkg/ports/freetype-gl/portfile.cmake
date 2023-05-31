@@ -14,12 +14,6 @@ vcpkg_from_github(
         0005-add-version.patch
 )
 
-vcpkg_check_features(
-    OUT_FEATURE_OPTIONS FEATURE_OPTIONS
-    FEATURES
-        "glad" freetype-gl_WITH_GLAD
-)
-
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
@@ -27,7 +21,6 @@ vcpkg_cmake_configure(
         -Dfreetype-gl_BUILD_DEMOS=OFF
         -Dfreetype-gl_BUILD_TESTS=OFF
         -Dfreetype-gl_BUILD_MAKEFONT=OFF
-        ${FEATURE_OPTIONS}
 )
 
 vcpkg_cmake_install()
@@ -39,5 +32,6 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
 vcpkg_fixup_pkgconfig()
+# Handle copyright
+file(INSTALL "${SOURCE_PATH}/LICENSE" DESTINATION "${CURRENT_PACKAGES_DIR}/share/freetype-gl" RENAME copyright)
 
-vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")

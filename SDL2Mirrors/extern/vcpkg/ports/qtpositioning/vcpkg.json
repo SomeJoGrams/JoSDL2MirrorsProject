@@ -1,11 +1,10 @@
 {
   "name": "qtpositioning",
-  "version": "6.5.1",
+  "version": "6.5.0",
   "description": "Qt Positioning",
   "homepage": "https://www.qt.io/",
   "license": null,
   "dependencies": [
-    "poly2tri",
     {
       "name": "qtbase",
       "default-features": false

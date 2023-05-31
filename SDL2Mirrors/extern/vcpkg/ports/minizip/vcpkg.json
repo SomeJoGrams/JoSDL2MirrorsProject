@@ -1,10 +1,11 @@
 {
   "name": "minizip",
   "version-semver": "1.2.13",
-  "port-version": 2,
+  "port-version": 1,
   "description": "Minizip zip file manipulation library",
   "homepage": "https://github.com/madler/zlib",
   "license": "Zlib",
+  "supports": "!uwp",
   "dependencies": [
     {
       "name": "vcpkg-cmake",

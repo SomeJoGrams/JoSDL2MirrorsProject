@@ -1,19 +1,12 @@
 {
+  "$reason": "Note that independent usage and testing may work, but it seems to fail in CI environments for potential cross-compilation, and is thusly noted here to note break how vcpkg builds things!",
   "name": "infoware",
-  "version-date": "2023-04-12",
+  "version-date": "2021-06-16",
+  "port-version": 1,
   "description": "C++ Library for pulling system and hardware information, without hitting the command line.",
   "homepage": "https://github.com/ThePhD/infoware",
-  "license": "CC0-1.0",
-  "supports": "!android & !uwp & !(windows & arm)",
+  "supports": "!(arm | uwp)",
   "dependencies": [
-    {
-      "name": "infoware",
-      "host": true
-    },
-    {
-      "name": "pciids",
-      "platform": "native"
-    },
     {
       "name": "vcpkg-cmake",
       "host": true
@@ -25,31 +18,16 @@
   ],
   "features": {
     "d3d": {
-      "description": [
-        "Use Direct3D for GPU detection.",
-        "This choice has priority over opencl and opengl."
-      ],
-      "supports": "windows"
+      "description": "Prefer usage of Direct3D to find graphical capabilities (typically only works on Windows systems)."
     },
     "opencl": {
-      "description": [
-        "Use OpenCL for GPU detection.",
-        "This choice has priority over opengl."
-      ],
-      "dependencies": [
-        "opencl"
-      ]
+      "description": "Prefer usage of OpenCL to find graphical capabilities of the system."
     },
     "opengl": {
-      "description": "Use OpenGL for GPU detection.",
-      "supports": "!osx & !ios",
-      "dependencies": [
-        "opengl"
-      ]
+      "description": "Prefer usage of OpenGL to find graphical capabilities (may require additional libraries to be available for linking depending on the system)."
     },
     "x11": {
-      "description": "Use X11 for display detection.",
-      "supports": "!windows"
+      "description": "Prefer usage of X11 to find graphical capabilities."
     }
   }
 }

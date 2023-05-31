@@ -79,7 +79,7 @@
         },
         {
           "$package": "Intl",
-          "name": "gettext-libintl"
+          "name": "gettext"
         },
         {
           "$package": "GIF",

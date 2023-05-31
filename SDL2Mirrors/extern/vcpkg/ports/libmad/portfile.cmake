@@ -1,6 +1,4 @@
-if(VCPKG_TARGET_IS_WINDOWS)
-    vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
-endif()
+vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
 
 vcpkg_from_sourceforge(
     OUT_SOURCE_PATH SOURCE_PATH
@@ -14,19 +12,14 @@ vcpkg_from_sourceforge(
 #The archive only contains a Visual Studio 6.0 era DSP project file, so use a custom CMakeLists.txt
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt" DESTINATION "${SOURCE_PATH}")
 
-file(COPY "${CMAKE_CURRENT_LIST_DIR}/mad.pc.in" DESTINATION "${SOURCE_PATH}")
-
 #Use the msvc++ config.h header
 file(COPY "${SOURCE_PATH}/msvc++/config.h" DESTINATION "${SOURCE_PATH}")
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
-    OPTIONS
-        "-DVERSION=${VERSION}"
 )
 
 vcpkg_cmake_install()
-vcpkg_fixup_pkgconfig()
 vcpkg_copy_pdbs()
 
 file(INSTALL "${SOURCE_PATH}/COPYING" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}" RENAME copyright)
