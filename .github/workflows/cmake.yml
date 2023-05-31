@@ -19,13 +19,34 @@ jobs:
 
     steps:
         - uses: actions/checkout@v3
+        
+        
+        - name: Cache vcpkg packages
+          id: cache-vcpkg  
+          uses: action/cache@v3
+          env:
+            cache-name: cache-vcpkg-packages
+          with:
+            #cache the whole vcpkg directory
+            path: ${{github.workspace}}/SDL2Mirrors/extern/vcpkg
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${hashFiles('${{github.workspace}}/vcpkg.json')}
+            #${{github.workspace}}\vcpkg_installed\vcpkg\info\gtest_1.13.0_x86-windows.list
+            restore-keys: |
+                ${{ runner.os }}-build-${{ env.cache-name }}-
+                ${{ runner.os }}-build-
+                ${{ runner.os }}-build-
+
   
         - name: show before bootstrap result
           run: ls ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/
-        - name: run vcpkg bootstrap
+
+        # if we could not retrieve the cache reinstall vcpkg and the packages
+        - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+          name: run vcpkg bootstrap
           run: cmd.exe /c ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/bootstrap-vcpkg.bat
 
-        - name: install vcpackages in manifest mode
+        - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+          name: install vcpackages in manifest mode
           run: ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/vcpkg.exe install
 
         - name: show result
