@@ -1,0 +1,1 @@
+[![CMake](https://github.com/SomeJoGrams/JoSDL2MirrorsProject/actions/workflows/cmake.yml/badge.svg)](https://github.com/SomeJoGrams/JoSDL2MirrorsProject/actions/workflows/cmake.yml)
