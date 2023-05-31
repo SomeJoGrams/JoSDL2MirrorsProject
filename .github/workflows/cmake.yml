@@ -23,9 +23,9 @@ jobs:
         - name: show before bootstrap result
           run: ls ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/
         - name: run vcpkg bootstrap
-          run: "${{github.workspace}}\\SDL2Mirrors\\extern\\vcpkg\\bootstrap-vcpkg.bat"
+          run: "${{github.workspace}}/SDL2Mirrors/extern/vcpkg/bootstrap-vcpkg.bat"
         - name: install vcpackages in manifest mode
-          run: "${{github.workspace}}\\SDL2Mirrors\\extern\\vcpkg\\vcpkg.exe" install
+          run: "${{github.workspace}}/SDL2Mirrors/extern/vcpkg/vcpkg.exe" install
         - name: show result
           run: ls ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/
 
