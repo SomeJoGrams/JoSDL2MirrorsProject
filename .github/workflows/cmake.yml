@@ -41,11 +41,11 @@ jobs:
           run: ls ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/
 
         # if we could not retrieve the cache reinstall vcpkg and the packages
-        - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
           name: run vcpkg bootstrap
           run: cmd.exe /c ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/bootstrap-vcpkg.bat
 
-        - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
           name: install vcpackages in manifest mode
           run: ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/vcpkg.exe install
 
