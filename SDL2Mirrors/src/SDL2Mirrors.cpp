@@ -75,6 +75,7 @@ int main(int argc, char* argv[])
           GL.makeContextCurrent(handle);
             });
 #endif
+    std::cout << "starting program\n";
     bool closeProgram = false;
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -170,7 +171,7 @@ int main(int argc, char* argv[])
     double fps = 60;
     double millliseconds = std::ceil(1000/60);
 
-
+    
     SDL_RenderPresent(mainRenderer);
 
     
