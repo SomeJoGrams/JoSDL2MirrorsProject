@@ -24,6 +24,8 @@ jobs:
     needs: setupRespository
     runs-on: windows-latest
     steps:
+        - name: show before bootstrap result
+          run: ls ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/
         - name: run vcpkg bootstrap
           run: ${{github.workspace}}/SDL2Mirrors/extern/vcpkg/bootstrap-vcpkg.bat
 
